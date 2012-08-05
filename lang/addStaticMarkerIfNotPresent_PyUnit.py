@@ -34,7 +34,7 @@ class Test_addStaticMarkerIfNotPresent(unittest.TestCase):
         Methods.twoParamFunc\
       ])
   
-  def test_markerAdded(self):
+  def test_markerAdded(self) -> None:
     
     def test(\
       func : (types.FunctionType, types.MethodType), \
@@ -49,7 +49,7 @@ class Test_addStaticMarkerIfNotPresent(unittest.TestCase):
       for func in self.__funcs:
         test(func, marker)
   
-  def test_markerNotAdded(self):
+  def test_markerNotAdded(self) -> None:
 
     def addMarker(\
       func : (types.FunctionType, types.MethodType), \
