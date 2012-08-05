@@ -74,6 +74,24 @@ class Test_EnumCanOnlyInheritFromClassObject(unittest.TestCase):
     testBaseClassNotObject()
     testMultipleBaseClasses()
 
+class Test_EnumConstantsMustBeValidPythonIdentifiers(unittest.TestCase):
+  
+  def test_pValidIds(self) -> None:
+    class SingleLetterIds(metaclass=Enum):
+      R = 1
+      G = 2
+      B = 3
+    
+    class IdsWithDigits(metaclass=Enum):
+      Camry99 = 30
+      Corolla03 = 31
+      Lexus12 = 32
+    
+    class IdsWithDigitsAndUnderscores(metaclass=Enum):
+      class_of_98 = 1998
+      ClassOf_98 = 1998
+      Class_Of_98 = 1998
+      
 #  def test_EnumConstantsAreValidPythonIdentifiers(self):
 #    class Color(metaclass=Enum):
 #      $R = 1
