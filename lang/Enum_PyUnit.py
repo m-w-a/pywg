@@ -2,6 +2,7 @@
 
 from _Enum import *
 import unittest
+import codeop
 
 class Test_EnumCanOnlyInheritFromClassObject(unittest.TestCase):
   
@@ -91,7 +92,18 @@ class Test_EnumConstantsMustBeValidPythonIdentifiers(unittest.TestCase):
       class_of_98 = 1998
       ClassOf_98 = 1998
       Class_Of_98 = 1998
-      
+  
+  def test_nValidIds(self):
+    with self.assertRaises(SyntaxError):
+      codeop.compile_command(\
+        'class Color(metaclass=Enum):'\
+        '  R$ = 1')
+    
+    with self.assertRaises(SyntaxError):
+      codeop.compile_command(\
+        'class Class(metaclass=Enum):'\
+        '  1998 = 1998')
+    
 #  def test_EnumConstantsAreValidPythonIdentifiers(self):
 #    class Color(metaclass=Enum):
 #      $R = 1
