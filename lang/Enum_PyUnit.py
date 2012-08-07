@@ -107,21 +107,61 @@ class Test_EnumConstantsMustBeValidPythonIdentifiers(unittest.TestCase):
 class Test_EnumConstantsMustBeOfTypeIntOrEllipsis(unittest.TestCase):  
   def test_okIfOfTypeIntOrEllipsis(self) -> None:
     def test_okIfOfTypeInt() -> None:
-      ...
+      def testPlainNumbers() -> None:
+        class MonoChrome(metaclass=Enum):
+          R = 1
+        
+        class HDTV(metaclass=Enum):
+          R = 1
+          G = 2
+          B = 3
+        
+      def testExpressions() -> None:
+        class PlasmaTv(metaclass=Enum):
+          R = 1
+          G = R + 1
+          B = G + 1
+          Magenta = R * 10
+          Cyan = G + R + 5
+          Velvet = Cyan + Magenta - 1
+      
+      testPlainNumbers()
+      testExpressions()
     
     def test_okIfOfTypeEllipsis() -> None:
-      ...
+      class MonoChrome(metaclass=Enum):
+        R = ...
+      
+      class HDTV(metaclass=Enum):
+        R = ...
+        G = ...
+        B = ...
     
     def test_okIfBothOfTypeIntOrEllipsis() -> None:
-      ...
-  
-  def test_notOkIfNotOfTypeIntNorEllipsis(self):
-    ...
+      class HDTV(metaclass=Enum):
+        R = ...
+        G = 1
+        B = ...
+      
+      class PlasmaTv(metaclass=Enum):
+        R = ...
+        G = 1
+        B = 11
+        Magenta = ...
+        Cyan = G + B
+        Velvet = ...
     
-  
-#  def test_EnumConstantsAreValidPythonIdentifiers(self):
-#    class Color(metaclass=Enum):
-#      $R = 1
+    test_okIfOfTypeInt()
+    test_okIfOfTypeEllipsis()
+    test_okIfBothOfTypeIntOrEllipsis()
+    
+  def test_notOkIfNotOfTypeIntNorEllipsis(self):
+    
+    expectedErrMsgSubStr = \
+      'these user declared attributes are not of type int or ellipsis: '
+    
+    #TODO ...
+    
 
 if __name__ == '__main__':
   unittest.main()

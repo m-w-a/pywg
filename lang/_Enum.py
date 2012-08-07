@@ -115,22 +115,3 @@ class Enum(type):
   @staticmethod
   def __isPythonSpecialName(name : str) -> bool:
     return name.startswith('__') and name.endswith('__')
-
-if __name__ == '__main__':
-  class Color(metaclass=Enum):
-    R = 1
-    G = ...
-    B = 101
-  #  def foo(): pass
-
-  #class FancyColor(Color, metaclass=Enum): pass
-
-  print(Color.R.Name)
-  print(Color.R.Value)
-  print(Color.G.Value)
-  print(Color.B.Value)
-  print(Color.R)
-  print(Color.G)
-  print(Color.B)
-  print(repr(Color.R))
-  print(Color.R != Color.R)
