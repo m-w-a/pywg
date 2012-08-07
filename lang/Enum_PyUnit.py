@@ -9,7 +9,7 @@ class Test_EnumCanOnlyInheritFromClassObject(unittest.TestCase):
   def setUp(self): pass
   def tearDown(self): pass
   
-  def test_pInherit(self) -> None:
+  def test_okIfOnlyInheritFromObject(self) -> None:
     
     def testEmptyBaseClass() -> None:
       class Color(metaclass=Enum):
@@ -36,7 +36,7 @@ class Test_EnumCanOnlyInheritFromClassObject(unittest.TestCase):
     testEmptyBaseClass()
     testObjectAsSoleDeclaredBaseClass()
     
-  def test_nInherit(self) -> None:
+  def test_notOkIfMultiplyInherit(self) -> None:
     
     expectedErrMsgSubStr = 'has base classes other than object'
     
@@ -77,7 +77,7 @@ class Test_EnumCanOnlyInheritFromClassObject(unittest.TestCase):
 
 class Test_EnumConstantsMustBeValidPythonIdentifiers(unittest.TestCase):
   
-  def test_pValidIds(self) -> None:
+  def test_okIfValidIds(self) -> None:
     class SingleLetterIds(metaclass=Enum):
       R = 1
       G = 2
@@ -93,7 +93,7 @@ class Test_EnumConstantsMustBeValidPythonIdentifiers(unittest.TestCase):
       ClassOf_98 = 1998
       Class_Of_98 = 1998
   
-  def test_nValidIds(self):
+  def test_notOkIfInvalidIds(self) -> None:
     with self.assertRaises(SyntaxError):
       codeop.compile_command(\
         'class Color(metaclass=Enum):'\
@@ -103,7 +103,22 @@ class Test_EnumConstantsMustBeValidPythonIdentifiers(unittest.TestCase):
       codeop.compile_command(\
         'class Class(metaclass=Enum):'\
         '  1998 = 1998')
+
+class Test_EnumConstantsMustBeOfTypeIntOrEllipsis(unittest.TestCase):  
+  def test_okIfOfTypeIntOrEllipsis(self) -> None:
+    def test_okIfOfTypeInt() -> None:
+      ...
     
+    def test_okIfOfTypeEllipsis() -> None:
+      ...
+    
+    def test_okIfBothOfTypeIntOrEllipsis() -> None:
+      ...
+  
+  def test_notOkIfNotOfTypeIntNorEllipsis(self):
+    ...
+    
+  
 #  def test_EnumConstantsAreValidPythonIdentifiers(self):
 #    class Color(metaclass=Enum):
 #      $R = 1
