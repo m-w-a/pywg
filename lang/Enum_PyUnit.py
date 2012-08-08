@@ -158,10 +158,118 @@ class Test_EnumConstantsMustBeOfTypeIntOrEllipsis(unittest.TestCase):
   def test_notOkIfNotOfTypeIntNorEllipsis(self):
     
     expectedErrMsgSubStr = \
-      'these user declared attributes are not of type int or ellipsis: '
+      'these user declared attributes are not of type int or ellipsis:'
     
-    #TODO ...
+    def testUnmixedSingleInvalidType() -> None:    
+      
+      with self.assertRaisesRegex(\
+        TypeError, 
+        ' '.join([expectedErrMsgSubStr, 'R'])):
+        
+        class Color(metaclass=Enum):
+          R = 0.0
+          
+      with self.assertRaisesRegex(\
+        TypeError, 
+        ' '.join([expectedErrMsgSubStr, 'R'])):
+        
+        class Color(metaclass=Enum):
+          R = 'Red'
+      
+      with self.assertRaisesRegex(\
+        TypeError, 
+        ' '.join([expectedErrMsgSubStr, 'R'])):
+      
+        class Color(metaclass=Enum):
+          R = []
+      
+      with self.assertRaisesRegex(\
+        TypeError, 
+        ' '.join([expectedErrMsgSubStr, 'R'])):
+        
+        class Color(metaclass=Enum):
+          R = ()
+      
+      with self.assertRaisesRegex(\
+        TypeError, 
+        ' '.join([expectedErrMsgSubStr, 'R'])):
+        
+        class Color(metaclass=Enum):
+          R = {}
     
+    def testMixedSingleInvalidType() -> None:
+      
+      with self.assertRaisesRegex(\
+        TypeError, 
+        ' '.join([expectedErrMsgSubStr, 'R'])):
+        
+        class Color(metaclass=Enum):
+          R = 0.0
+          G = ...
+          
+      with self.assertRaisesRegex(\
+        TypeError, 
+        ' '.join([expectedErrMsgSubStr, 'R'])):
+        
+        class Color(metaclass=Enum):
+          R = 'Red'
+          G = 1
+      
+      with self.assertRaisesRegex(\
+        TypeError, 
+        ' '.join([expectedErrMsgSubStr, 'R'])):
+      
+        class Color(metaclass=Enum):
+          G = ...
+          R = []
+      
+      with self.assertRaisesRegex(\
+        TypeError, 
+        ' '.join([expectedErrMsgSubStr, 'R'])):
+        
+        class Color(metaclass=Enum):
+          G = 1
+          R = ()
+      
+      with self.assertRaisesRegex(\
+        TypeError, 
+        ' '.join([expectedErrMsgSubStr, 'R'])):
+        
+        class Color(metaclass=Enum):
+          G = ...
+          R = {}
+          B = 1
+    
+    def testUnmixedMultipleInvalidTypes() -> None:
+      with self.assertRaisesRegex(
+        TypeError,
+        ' '.join([expectedErrMsgSubStr, 'AK, AR, CA, DL'])):
+        
+        class State(metaclass=Enum):
+          AK = 1.1
+          AR = []
+          CA = ()
+          DL = {}
+    
+    def testMixedMultipleInvalidTypes() -> None:
+      with self.assertRaisesRegex(
+        TypeError,
+        ' '.join([expectedErrMsgSubStr, 'AK, CA, PA, MS'])):
+        
+        class State(metaclass=Enum):
+          AK = 1.1
+          AR = 0
+          CA = ()
+          DL = ...
+          PA = []
+          LI = AR + 10
+          MI = LI + AR
+          MS = {}
+    
+    testUnmixedSingleInvalidType()
+    testMixedSingleInvalidType()
+    testUnmixedMultipleInvalidTypes()
+    testMixedMultipleInvalidTypes()
 
 if __name__ == '__main__':
   unittest.main()
