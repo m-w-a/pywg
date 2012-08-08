@@ -1,6 +1,7 @@
 #! /usr/bin/env python3.2
 
 from _Enum import *
+import builtins
 import unittest
 import codeop
 
@@ -270,6 +271,21 @@ class Test_EnumConstantsMustBeOfTypeIntOrEllipsis(unittest.TestCase):
     testMixedSingleInvalidType()
     testUnmixedMultipleInvalidTypes()
     testMixedMultipleInvalidTypes()
+
+class Test_EnumConstantsAreOfTypeEnum(unittest.TestCase):
+  def test_typeEnumConstTypes(self) -> None:
+    class Color(metaclass=Enum):
+      R = ...
+      G = 1
+      B = G + 1
+      Magenta = B + G
+      Cyan = builtins.len(['Crayola'])
+
+    self.assertIs(type(Color.R), Color)
+    self.assertIs(type(Color.G), Color)
+    self.assertIs(type(Color.B), Color)
+    self.assertIs(type(Color.Magenta), Color)
+    self.assertIs(type(Color.Cyan), Color)
 
 if __name__ == '__main__':
   unittest.main()
