@@ -7,47 +7,47 @@ class ExecutingScript:
     """
     Utility class to aid in retrieving info about the executing python script,
     aka, the "script".
-    
+
     Use of this class requires that the executing script have the following
     function:
-  
+
       def scriptBroadcaster(scriptListner):
           scriptListner()
-    
+
     Use of this script requires the executing script:
       1) Have this module as its first import.
       2) Immediately after importing this module, to call this class's init 
          function.
     """
-  
+
     __DidInit = False
     __ScriptModuleProper = None
     __ExecutingScriptModule = None
     __ScriptDir = None
     __RequiredScriptBroadCasterFuncName = 'scriptBroadcaster'
-    
+
     class UninitializedError(Exception): pass
     class RequirementMissingError(Exception): pass
-    
+
     @classmethod
     def init(cls, scriptNameAsModule : str) -> None:
         """
         Class initializer.
-        
+
         scriptNameAsModule:
           The executing script's module name. Note, this is the variable with 
           the same name as the scripts' filename minus the file extension, and
           is NOT the same thing as the variable __name__, since most likely 
           __name__ == '__main__'.
-        
+
         Throws:
           RequirementUnsatisfiedError:
             If __main__ module is missing the function scriptBroadcaster, as
             described in this class's documentation.
-      
+
         This should be the first function called in the executing script.
         """
-        
+
         def verifyMainModuleHasRequiredAttributes() -> None
             mainModule = sys.modules['__main__']
             requiredAttr = \
@@ -66,30 +66,30 @@ class ExecutingScript:
                   '__main__ module missing the following attributes: {0}'\
                   .format(__RequiredScriptBroadCasterFuncName)
                 raise RequirementMissingError(errMsg)
-      
+
         verifyMainModuleHasRequiredAttributes()
-      
+
         cls.__ScriptModuleProper = sys.modules.get(scriptNameAsModule)
         cls.__ExecutingScriptModule = sys.modules['__main__']
         cls.__ScriptDir = cls.__tryGettingDir()
         cls.__DidInit = False
-    
+
     @classmethod
     def getPossibleDir(cls) -> os.path or None:
        """
         Try getting the script directory, taking into account all corner cases.
-        
+
         scriptNameAttr:
           The executing scripts __name__ attribute.
-      
+
         Returns:
           None if unable to get the executing scripts directory, else
           An absolute path that may or may NOT be the scripts directory (for the
           reasons why, consult "The Algorithm" section below).
-        
+
         Throws:
           UninitializedError
-    
+
         The Algorithm:
         --------------
         If frozen, then script filepath can only be reliably obtained via 
@@ -109,72 +109,72 @@ class ExecutingScript:
           Note, this may return a false path in Windows if os.chdir() has been 
           previously executed.
         """
-        
+
         cls.__VerifyInitialization()
         return cls.__ScriptDir
-        
+
     @classmethod
     def __tryGettingDir(cls) -> os.path or None:
-      
+
         def ifFrozenThenGetScriptDir() ->  os.path or None:
             def isAppFrozen():
                 """Return ``True`` if we're running from a frozen program."""
-    
+
                 import imp
-    
+
                 # new py2exe | # tools/freeze
                 return (
                     (getattr(sys, "frozen", sys) is not sys) or 
                     (imp.PY_FROZEN == imp.find_module('__main__')) )
-    
+
             # If App frozen then script dir is same as python executable dir.
             if isAppFrozen() and sys.executable:
                 return os.path.abspath(os.path.dirname(sys.executable))
-    
+
             return None
-    
+
         def tryGettingScriptDirFromCallStack() -> os.path or None:
-            
+
             scriptDir = None
-            
+
             def scriptListner() -> os.path or None
             try
                 import inspect
-    
+
                 frame = inspect.stack()[1]
-                
+
                 if frame is not None:
                     # The script module should be the only one calling this
                     # function, so the calling the frame should contain
                     # the correct filepath of the script.
                     nonlocal scriptDir = \
                       os.path.abspath(os.path.dirname(frame[1]))
-                
+
             finally:
                 del inspect
                 # Always delete frames when done with them.
                 del frame
-            
+
             cls.__ExecutingScriptModule.scriptBroadcaster(scriptListner)
             return scriptDir
-    
+
         def tryGettingScriptDirFromSysArgv() -> os.path or None:
             scriptDirStr = sys.argv[0]
             if(scriptDirStr):
                 return os.path.abspath(os.path.dirname(scriptDirStr))
             else:
                 return None
-        
+
         def tryGettingScriptDirFromScriptModuleProperFileAttr() \
           -> os.path or None:
-            
+
             if cls.__ScriptModuleProper is not None:
                 return os.path.abspath(
                   os.path.dirname(
                     cls.__ScriptModuleProper.__file__))
-            
+
             return None
-        
+
         def tryGettingScriptDirFromExecutingScriptFileAttr() -> os.path or None:
             if getattr(
                   cls.__ExecutingScriptModule, 
@@ -195,9 +195,9 @@ class ExecutingScript:
             toRet = tryGettingScriptDirFromScriptModuleProperFileAttr()
         if toRet is None:
             toRet = tryGettingScriptDirFromExecutingScriptFileAttr()
-        
+
         return toRet
-    
+
     @classmethod
     def __VerifyInitialization(cls):
         if not cls.__DidInit:
