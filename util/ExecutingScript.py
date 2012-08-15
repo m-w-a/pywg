@@ -2,6 +2,8 @@
 
 import sys
 import os
+import builtins
+import types
 
 class ExecutingScript:
     """
@@ -27,7 +29,7 @@ class ExecutingScript:
     __RequiredScriptBroadCasterFuncName = 'scriptBroadcaster'
 
     class UninitializedError(Exception): pass
-    class RequirementMissingError(Exception): pass
+    class RequirementUnsatisfiedError(Exception): pass
 
     @classmethod
     def init(cls, scriptNameAsModule : str) -> None:
@@ -48,7 +50,7 @@ class ExecutingScript:
         This should be the first function called in the executing script.
         """
 
-        def verifyMainModuleHasRequiredAttributes() -> None
+        def verifyMainModuleHasRequiredAttributes() -> None:
             mainModule = sys.modules['__main__']
             requiredAttr = \
               getattr(
@@ -56,16 +58,16 @@ class ExecutingScript:
                 cls.__RequiredScriptBroadCasterFuncName,
                 mainModule)
             if requiredAttr is not mainModule:
-                if builtins.type(requiredAttr) is not function:
+                if builtins.type(requiredAttr) is not types.FunctionType:
                     errMsg = \
                       "__main__ module attribute: '{0}' must be of "\
                       "type function".format(__RequiredScriptBroadCasterFuncName)
-                    raise RequirementMissingError(errMsg)
+                    raise RequirementUnsatisfiedError(errMsg)
             else:
                 errMsg = \
                   '__main__ module missing the following attributes: {0}'\
                   .format(__RequiredScriptBroadCasterFuncName)
-                raise RequirementMissingError(errMsg)
+                raise RequirementUnsatisfiedError(errMsg)
 
         verifyMainModuleHasRequiredAttributes()
 
@@ -76,7 +78,7 @@ class ExecutingScript:
 
     @classmethod
     def getPossibleDir(cls) -> os.path or None:
-       """
+        """
         Try getting the script directory, taking into account all corner cases.
 
         scriptNameAttr:
@@ -101,6 +103,8 @@ class ExecutingScript:
           Note, this may fail since in interactive mode sys.argv[0] will return 
           an empty string for any script run from the prompt.
         Else, try the module script's __file__.
+          (Note, this presupposes that the script itself has been loaded as a
+          module.)
           Note, this may return a false path in Windows if os.chdir() has been 
           previously executed.
         Else, try the executing script's __file__.
@@ -137,26 +141,27 @@ class ExecutingScript:
 
             scriptDir = None
 
-            def scriptListner() -> os.path or None
-            try
-                import inspect
-
-                frame = inspect.stack()[1]
-
-                if frame is not None:
-                    # The script module should be the only one calling this
-                    # function, so the calling the frame should contain
-                    # the correct filepath of the script.
-                    nonlocal scriptDir = \
-                      os.path.abspath(os.path.dirname(frame[1]))
-
-            finally:
-                del inspect
-                # Always delete frames when done with them.
-                del frame
-
-            cls.__ExecutingScriptModule.scriptBroadcaster(scriptListner)
-            return scriptDir
+            def scriptListner() -> os.path or None:
+                try:
+                    import inspect
+    
+                    frame = inspect.stack()[1]
+    
+                    if frame is not None:
+                        # The script module should be the only one calling this
+                        # function, so the calling the frame should contain
+                        # the correct filepath of the script.
+                        nonlocal scriptDir
+                        scriptDir = \
+                          os.path.abspath(os.path.dirname(frame[1]))
+    
+                finally:
+                    del inspect
+                    # Always delete frames when done with them.
+                    del frame
+    
+                cls.__ExecutingScriptModule.scriptBroadcaster(scriptListner)
+                return scriptDir
 
         def tryGettingScriptDirFromSysArgv() -> os.path or None:
             scriptDirStr = sys.argv[0]
@@ -179,7 +184,7 @@ class ExecutingScript:
             if getattr(
                   cls.__ExecutingScriptModule, 
                   '__file__', 
-                  cls.__ExecutingScriptModule) \ 
+                  cls.__ExecutingScriptModule) \
                 is cls.__ExecutingScriptModule:
                 return None
             else:
