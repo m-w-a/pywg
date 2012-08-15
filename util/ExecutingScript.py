@@ -144,9 +144,9 @@ class ExecutingScript:
             def scriptListner() -> os.path or None:
                 try:
                     import inspect
-    
+
                     frame = inspect.stack()[1]
-    
+
                     if frame is not None:
                         # The script module should be the only one calling this
                         # function, so the calling the frame should contain
@@ -154,14 +154,14 @@ class ExecutingScript:
                         nonlocal scriptDir
                         scriptDir = \
                           os.path.abspath(os.path.dirname(frame[1]))
-    
+
                 finally:
                     del inspect
                     # Always delete frames when done with them.
                     del frame
-    
-                cls.__ExecutingScriptModule.scriptBroadcaster(scriptListner)
-                return scriptDir
+
+            cls.__ExecutingScriptModule.scriptBroadcaster(scriptListner)
+            return scriptDir
 
         def tryGettingScriptDirFromSysArgv() -> os.path or None:
             scriptDirStr = sys.argv[0]
