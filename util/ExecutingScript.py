@@ -62,12 +62,12 @@ class ExecutingScript:
                     errMsg = \
                       "__main__ module attribute: '{0}' must be of "\
                       "type function".format(__RequiredScriptBroadCasterFuncName)
-                    raise RequirementUnsatisfiedError(errMsg)
+                    raise cls.RequirementUnsatisfiedError(errMsg)
             else:
                 errMsg = \
                   '__main__ module missing the following attributes: {0}'\
-                  .format(__RequiredScriptBroadCasterFuncName)
-                raise RequirementUnsatisfiedError(errMsg)
+                  .format(cls.__RequiredScriptBroadCasterFuncName)
+                raise cls.RequirementUnsatisfiedError(errMsg)
 
         verifyMainModuleHasRequiredAttributes()
 
