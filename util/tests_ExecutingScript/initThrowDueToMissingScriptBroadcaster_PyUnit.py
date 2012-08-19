@@ -2,7 +2,6 @@
 
 _Exception = None
 try:
-
     from ExecutingScript import *
     ExecutingScript.init('initNoThrowDueToMissingScriptBroadcaster')
 
@@ -22,4 +21,5 @@ class Test_initThrowDueToMissingScriptBroadcaster(unittest.TestCase):
                 raise _Exception
 
 if __name__ == '__main__':
-    unittest.main()
+    import sys
+    unittest.main(argv=[sys.argv[0]])

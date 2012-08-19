@@ -10,8 +10,8 @@ class ExecutingScript:
     Utility class to aid in retrieving info about the executing python script,
     aka, the "script".
 
-    Use of this class requires that the executing script have the following
-    function:
+    Use of this class requires that the executing script define the following
+    function prior to importing this module:
 
       def scriptBroadcaster(scriptListner):
           scriptListner()

@@ -19,4 +19,5 @@ class Test_initNoThrow(unittest.TestCase):
             raise _Exception
 
 if __name__ == '__main__':
-    unittest.main()
+    import sys
+    unittest.main(argv=[sys.argv[0]])
