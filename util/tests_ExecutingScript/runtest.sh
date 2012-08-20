@@ -1,5 +1,10 @@
 #!/bin/bash
 
+#------------------------------------------------------------------------------#
+# Bash shell script needed to verifiably pass in the executing python scripts
+# home directory as a command line argument to the python unit test.
+#------------------------------------------------------------------------------#
+
 usageMsg="\
 Usage: runtest.sh --help
 Usage: runtest.sh python-executable --all
