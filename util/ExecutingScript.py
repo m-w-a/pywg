@@ -74,7 +74,7 @@ class ExecutingScript:
         cls.__ScriptModuleProper = sys.modules.get(scriptNameAsModule)
         cls.__ExecutingScriptModule = sys.modules['__main__']
         cls.__ScriptDir = cls.__tryGettingDir()
-        cls.__DidInit = False
+        cls.__DidInit = True
 
     @classmethod
     def getPossibleDir(cls) -> os.path or None:
@@ -104,14 +104,14 @@ class ExecutingScript:
           an empty string for any script run from the prompt.
         Else, try the module script's __file__.
           (Note, this presupposes that the script itself has been loaded as a
-          module.)
-          Note, this may return a false path in Windows if os.chdir() has been 
-          previously executed.
+          module, in addition to being run as an executable.)
+          Note, this may return a false path in Windows if os.chdir() was
+          executed before this class was initialized.
         Else, try the executing script's __file__.
           Note, this may fail since in interactive mode the __file__ will not
           exist for the script run from the prompt.
-          Note, this may return a false path in Windows if os.chdir() has been 
-          previously executed.
+          Note, this may return a false path in Windows if os.chdir() was
+          executed before this class was initialized.
         """
 
         cls.__VerifyInitialization()
@@ -206,4 +206,4 @@ class ExecutingScript:
     @classmethod
     def __VerifyInitialization(cls):
         if not cls.__DidInit:
-            raise UninitializedError()
+            raise cls.UninitializedError()

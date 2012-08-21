@@ -22,4 +22,5 @@ class Test_initThrowDueToMissingScriptBroadcaster(unittest.TestCase):
 
 if __name__ == '__main__':
     import sys
-    unittest.main(argv=[sys.argv[0]])
+
+    unittest.main(argv=[ sys.argv[0] ])
