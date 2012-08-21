@@ -22,12 +22,6 @@ class ExecutingScript:
          function.
     """
 
-    __DidInit = False
-    __ScriptModuleProper = None
-    __ExecutingScriptModule = None
-    __ScriptDir = None
-    __RequiredScriptBroadCasterFuncName = 'scriptBroadcaster'
-
     class UninitializedError(Exception): pass
     class RequirementUnsatisfiedError(Exception): pass
 
@@ -49,32 +43,7 @@ class ExecutingScript:
 
         This should be the first function called in the executing script.
         """
-
-        def verifyMainModuleHasRequiredAttributes() -> None:
-            mainModule = sys.modules['__main__']
-            requiredAttr = \
-              getattr(
-                mainModule, 
-                cls.__RequiredScriptBroadCasterFuncName,
-                mainModule)
-            if requiredAttr is not mainModule:
-                if builtins.type(requiredAttr) is not types.FunctionType:
-                    errMsg = \
-                      "__main__ module attribute: '{0}' must be of "\
-                      "type function".format(__RequiredScriptBroadCasterFuncName)
-                    raise cls.RequirementUnsatisfiedError(errMsg)
-            else:
-                errMsg = \
-                  '__main__ module missing the following attributes: {0}'\
-                  .format(cls.__RequiredScriptBroadCasterFuncName)
-                raise cls.RequirementUnsatisfiedError(errMsg)
-
-        verifyMainModuleHasRequiredAttributes()
-
-        cls.__ScriptModuleProper = sys.modules.get(scriptNameAsModule)
-        cls.__ExecutingScriptModule = sys.modules['__main__']
-        cls.__ScriptDir = cls.__tryGettingDir()
-        cls.__DidInit = True
+        cls.__Impl.init(scriptNameAsModule)
 
     @classmethod
     def getPossibleDir(cls) -> os.path or None:
@@ -114,96 +83,141 @@ class ExecutingScript:
           executed before this class was initialized.
         """
 
-        cls.__VerifyInitialization()
-        return cls.__ScriptDir
+        return cls.__Impl.getPossibleDir()
 
-    @classmethod
-    def __tryGettingDir(cls) -> os.path or None:
+    class __Impl:
 
-        def ifFrozenThenGetScriptDir() ->  os.path or None:
-            def isAppFrozen():
-                """Return ``True`` if we're running from a frozen program."""
+        __DidInit = False
+        __ScriptModuleProper = None
+        __ExecutingScriptModule = None
+        __PossibleScriptDir = None
+        __RequiredScriptBroadCasterFuncName = 'scriptBroadcaster'
 
-                import imp
+        @classmethod
+        def init(cls, scriptNameAsModule : str) -> None:
+            def verifyMainModuleHasRequiredAttributes() -> None:
+                mainModule = sys.modules['__main__']
+                requiredAttr = \
+                  getattr(
+                    mainModule, 
+                    cls.__RequiredScriptBroadCasterFuncName,
+                    mainModule)
+                if requiredAttr is not mainModule:
+                    if builtins.type(requiredAttr) is not types.FunctionType:
+                        errMsg = \
+                        "__main__ module attribute: '{0}' must be of "\
+                        "type function".format(
+                          __RequiredScriptBroadCasterFuncName)
+                        raise ExecutingScriopt.RequirementUnsatisfiedError(
+                          errMsg)
+                else:
+                    errMsg = \
+                      '__main__ module missing the following attributes: {0}'\
+                      .format(cls.__RequiredScriptBroadCasterFuncName)
+                    raise ExecutingScript.RequirementUnsatisfiedError(errMsg)
 
-                # new py2exe | # tools/freeze
-                return (
-                    (getattr(sys, "frozen", sys) is not sys) or 
-                    (imp.PY_FROZEN == imp.find_module('__main__')) )
+            verifyMainModuleHasRequiredAttributes()
 
-            # If App frozen then script dir is same as python executable dir.
-            if isAppFrozen() and sys.executable:
-                return os.path.abspath(os.path.dirname(sys.executable))
+            cls.__ScriptModuleProper = sys.modules.get(scriptNameAsModule)
+            cls.__ExecutingScriptModule = sys.modules['__main__']
+            cls.__PossibleScriptDir = cls.__tryGettingDir()
+            cls.__DidInit = True
 
-            return None
+        @classmethod
+        def getPossibleDir(cls) -> os.path or None:
+            cls.__VerifyInitialization() #TODO
+            return cls.__PossibleScriptDir
 
-        def tryGettingScriptDirFromCallStack() -> os.path or None:
+        @classmethod
+        def __VerifyInitialization(cls):
+            if not cls.__DidInit:
+                raise ExecutingScript.UninitializedError()
 
-            scriptDir = None
+        @classmethod
+        def __tryGettingDir(cls) -> os.path or None:
 
-            def scriptListner() -> os.path or None:
-                try:
-                    import inspect
+            def ifFrozenThenGetScriptDir() ->  os.path or None:
+                def isAppFrozen():
+                    """Return ``True`` if we're running from a frozen program."""
 
-                    frame = inspect.stack()[1]
+                    import imp
 
-                    if frame is not None:
-                        # The script module should be the only one calling this
-                        # function, so the calling the frame should contain
-                        # the correct filepath of the script.
-                        nonlocal scriptDir
-                        scriptDir = \
-                          os.path.abspath(os.path.dirname(frame[1]))
+                    # new py2exe | # tools/freeze
+                    return (
+                        (getattr(sys, "frozen", sys) is not sys) or 
+                        (imp.PY_FROZEN == imp.find_module('__main__')) )
 
-                finally:
-                    del inspect
-                    # Always delete frames when done with them.
-                    del frame
+                # If App frozen then script dir is same as python executable dir.
+                if isAppFrozen() and sys.executable:
+                    return os.path.abspath(os.path.dirname(sys.executable))
 
-            cls.__ExecutingScriptModule.scriptBroadcaster(scriptListner)
-            return scriptDir
-
-        def tryGettingScriptDirFromSysArgv() -> os.path or None:
-            scriptDirStr = sys.argv[0]
-            if(scriptDirStr):
-                return os.path.abspath(os.path.dirname(scriptDirStr))
-            else:
                 return None
 
-        def tryGettingScriptDirFromScriptModuleProperFileAttr() \
-          -> os.path or None:
+            def tryGettingScriptDirFromCallStack() -> os.path or None:
 
-            if cls.__ScriptModuleProper is not None:
-                return os.path.abspath(
-                  os.path.dirname(
-                    cls.__ScriptModuleProper.__file__))
+                scriptDir = None
 
-            return None
+                def scriptListner() -> os.path or None:
+                    try:
+                        import inspect
 
-        def tryGettingScriptDirFromExecutingScriptFileAttr() -> os.path or None:
-            if getattr(
-                  cls.__ExecutingScriptModule, 
-                  '__file__', 
+                        frame = inspect.stack()[1]
+
+                        if frame is not None:
+                            # The script module should be the only one calling
+                            # this function, so the calling the frame should 
+                            # contain the correct filepath of the script.
+                            nonlocal scriptDir
+                            scriptDir = \
+                            os.path.abspath(os.path.dirname(frame[1]))
+
+                    finally:
+                        del inspect
+                        # Always delete frames when done with them.
+                        del frame
+
+                cls.__ExecutingScriptModule.scriptBroadcaster(scriptListner)
+                return scriptDir
+
+            def tryGettingScriptDirFromSysArgv() -> os.path or None:
+                scriptDirStr = sys.argv[0]
+                if(scriptDirStr):
+                    return os.path.abspath(os.path.dirname(scriptDirStr))
+                else:
+                    return None
+
+            def tryGettingScriptDirFromScriptModuleProperFileAttr() \
+              -> os.path or None:
+
+                if cls.__ScriptModuleProper is not None:
+                    return os.path.abspath(
+                      os.path.dirname(
+                        cls.__ScriptModuleProper.__file__))
+
+                return None
+
+            def tryGettingScriptDirFromExecutingScriptFileAttr() \
+              -> os.path or None:
+
+                if getattr(
+                  cls.__ExecutingScriptModule,
+                  '__file__',
                   cls.__ExecutingScriptModule) \
-                is cls.__ExecutingScriptModule:
-                return None
-            else:
-                return os.path.abspath(os.path.dirname(
-                  cls.__ExecutingScriptModule.__file__))
+                    is cls.__ExecutingScriptModule:
 
-        toRet = ifFrozenThenGetScriptDir()
-        if toRet is None:
-            toRet = tryGettingScriptDirFromCallStack()
-        if toRet is None:
-            toRet = tryGettingScriptDirFromSysArgv()
-        if toRet is None:
-            toRet = tryGettingScriptDirFromScriptModuleProperFileAttr()
-        if toRet is None:
-            toRet = tryGettingScriptDirFromExecutingScriptFileAttr()
+                    return None
+                else:
+                    return os.path.abspath(os.path.dirname(
+                    cls.__ExecutingScriptModule.__file__))
 
-        return toRet
+            toRet = ifFrozenThenGetScriptDir()
+            if toRet is None:
+                toRet = tryGettingScriptDirFromCallStack()
+            if toRet is None:
+                toRet = tryGettingScriptDirFromSysArgv()
+            if toRet is None:
+                toRet = tryGettingScriptDirFromScriptModuleProperFileAttr()
+            if toRet is None:
+                toRet = tryGettingScriptDirFromExecutingScriptFileAttr()
 
-    @classmethod
-    def __VerifyInitialization(cls):
-        if not cls.__DidInit:
-            raise cls.UninitializedError()
+            return toRet
