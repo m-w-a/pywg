@@ -8,7 +8,12 @@
 usageMsg="\
 Usage: runtest.sh --help
 Usage: runtest.sh python-executable --all
-Usage: runtest.sh python-executable testfile(s)"
+Usage: runtest.sh python-executable testfile(s)
+
+Second form executes all tests of the form '*PyUnit.py' in the directory which
+this script is found.
+
+Third form executes each command-line specified test file in its own directory."
 
 if [ \( $# -eq 0 \) -o \
     \( $# -eq 1 \) -o \
