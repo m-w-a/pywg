@@ -23,6 +23,7 @@ class ExecutingScript:
     """
 
     class UninitializedError(Exception): pass
+    class AlreadyInitializedError(Exception): pass
     class RequirementUnsatisfiedError(Exception): pass
 
     @classmethod
@@ -40,6 +41,9 @@ class ExecutingScript:
           RequirementUnsatisfiedError:
             If __main__ module is missing the function scriptBroadcaster, as
             described in this class's documentation.
+          AlreadyInitializedError:
+            If this function has already been called, then this exception is
+            raised.
 
         This should be the first function called in the executing script.
         """
@@ -115,6 +119,9 @@ class ExecutingScript:
                       '__main__ module missing the following attributes: {0}'\
                       .format(cls.__RequiredScriptBroadCasterFuncName)
                     raise ExecutingScript.RequirementUnsatisfiedError(errMsg)
+
+            if cls.__DidInit:
+                raise ExecutingScript.AlreadyInitializedError()
 
             verifyMainModuleHasRequiredAttributes()
 

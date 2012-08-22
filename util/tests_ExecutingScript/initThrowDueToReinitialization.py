@@ -5,8 +5,12 @@ if __name__ == '__main__':
 
     _Exception = None
     try:
+        def scriptBroadcaster(scriptListner):
+            scriptListner()
+
         from ExecutingScript import *
-        ExecutingScript.init('initNoThrowDueToMissingScriptBroadcaster')
+        ExecutingScript.init('initThrowDueToReinitialization')
+        ExecutingScript.init('initThrowDueToReinitialization')
 
     # Catch all exceptions, and test for specific kind later.
     except Exception as ex:
@@ -14,13 +18,9 @@ if __name__ == '__main__':
 
     import unittest
 
-    class Test_initThrowDueToMissingScriptBroadcaster(unittest.TestCase):
+    class Test_initThrowDueToReinitialization(unittest.TestCase):
         def test(self):
-            expectedErrMsgSubStr = \
-            '__main__ module missing the following attributes: scriptBroadcaster'
-            with self.assertRaisesRegex(
-              ExecutingScript.RequirementUnsatisfiedError,
-              expectedErrMsgSubStr):
+            with self.assertRaises(ExecutingScript.AlreadyInitializedError):
                 if(_Exception is not None):
                     raise _Exception
 
