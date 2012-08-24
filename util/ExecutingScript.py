@@ -50,7 +50,7 @@ class ExecutingScript:
         cls.__Impl.init(scriptNameAsModule)
 
     @classmethod
-    def getPossibleDir(cls) -> os.path or None:
+    def getPossibleDir(cls) -> str or None:
         """
         Try getting the script directory, taking into account all corner cases.
 
@@ -131,9 +131,13 @@ class ExecutingScript:
             cls.__DidInit = True
 
         @classmethod
-        def getPossibleDir(cls) -> os.path or None:
-            cls.__VerifyInitialization() #TODO
+        def getPossibleDir(cls) -> str or None:
+            cls.__VerifyInitialization()
             return cls.__PossibleScriptDir
+
+#        @classmethod
+#        def allowRelativePaths(cls, topLevelPkgDir : str) -> None:
+#            cls.__VerifyInitialization()
 
         @classmethod
         def __VerifyInitialization(cls):
@@ -141,9 +145,9 @@ class ExecutingScript:
                 raise ExecutingScript.UninitializedError()
 
         @classmethod
-        def __tryGettingDir(cls) -> os.path or None:
+        def __tryGettingDir(cls) -> str or None:
 
-            def ifFrozenThenGetScriptDir() ->  os.path or None:
+            def ifFrozenThenGetScriptDir() ->  str or None:
                 def isAppFrozen():
                     """Return ``True`` if we're running from a frozen program."""
 
@@ -155,16 +159,19 @@ class ExecutingScript:
                         (imp.PY_FROZEN == imp.find_module('__main__')) )
 
                 # If App frozen then script dir is same as python executable dir.
-                if isAppFrozen() and sys.executable:
-                    return os.path.abspath(os.path.dirname(sys.executable))
+                if isAppFrozen() and sys.executable is not None:
+                    if( builtins.len(sys.executable) == 0 ):
+                        return None
+                    else:
+                        return sys.executable
 
                 return None
 
-            def tryGettingScriptDirFromCallStack() -> os.path or None:
+            def tryGettingScriptDirFromCallStack() -> str or None:
 
                 scriptDir = None
 
-                def scriptListner() -> os.path or None:
+                def scriptListner() -> None:
                     try:
                         import inspect
 
@@ -176,7 +183,7 @@ class ExecutingScript:
                             # contain the correct filepath of the script.
                             nonlocal scriptDir
                             scriptDir = \
-                            os.path.abspath(os.path.dirname(frame[1]))
+                              os.path.abspath(os.path.dirname(frame[1]))
 
                     finally:
                         del inspect
@@ -186,15 +193,16 @@ class ExecutingScript:
                 cls.__ExecutingScriptModule.scriptBroadcaster(scriptListner)
                 return scriptDir
 
-            def tryGettingScriptDirFromSysArgv() -> os.path or None:
+            def tryGettingScriptDirFromSysArgv() -> str or None:
                 scriptDirStr = sys.argv[0]
-                if(scriptDirStr):
+                if( scriptDirStr is not None and
+                  builtins.len(scriptDirStr) !=0 ):
                     return os.path.abspath(os.path.dirname(scriptDirStr))
                 else:
                     return None
 
             def tryGettingScriptDirFromScriptModuleProperFileAttr() \
-              -> os.path or None:
+              -> str or None:
 
                 if cls.__ScriptModuleProper is not None:
                     return os.path.abspath(
@@ -204,7 +212,7 @@ class ExecutingScript:
                 return None
 
             def tryGettingScriptDirFromExecutingScriptFileAttr() \
-              -> os.path or None:
+              -> str or None:
 
                 if getattr(
                   cls.__ExecutingScriptModule,
@@ -215,7 +223,7 @@ class ExecutingScript:
                     return None
                 else:
                     return os.path.abspath(os.path.dirname(
-                    cls.__ExecutingScriptModule.__file__))
+                      cls.__ExecutingScriptModule.__file__))
 
             toRet = ifFrozenThenGetScriptDir()
             if toRet is None:
