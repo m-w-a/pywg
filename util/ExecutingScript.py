@@ -25,6 +25,7 @@ class ExecutingScript:
     class UninitializedError(Exception): pass
     class AlreadyInitializedError(Exception): pass
     class RequirementUnsatisfiedError(Exception): pass
+    class InvalidTopLevelPackage(Exception): pass
 
     @classmethod
     def init(cls, scriptNameAsModule : str) -> None:
@@ -89,6 +90,21 @@ class ExecutingScript:
 
         return cls.__Impl.getPossibleDir()
 
+    @classmethod
+    def allowRelativePaths(cls, topLevelPkgDir : str) -> None:
+        """
+        topLevelPkgDir:
+          Relative parent path to the executing script, indicating the directory
+          of the top level package that relative imports in the executing script
+          should be referenced to.
+
+        Throws:
+          InvalidTopLevelPackage
+            If topLevelPkgDir is not an ancestor path of the executing script
+            directory, then above exception is raised.
+        """
+        return cls.__Impl.allowRelativePaths(topLevelPkgDir)
+
     class __Impl:
 
         __DidInit = False
@@ -135,9 +151,54 @@ class ExecutingScript:
             cls.__VerifyInitialization()
             return cls.__PossibleScriptDir
 
-#        @classmethod
-#        def allowRelativePaths(cls, topLevelPkgDir : str) -> None:
-#            cls.__VerifyInitialization()
+        @classmethod
+        def allowRelativePaths(cls, topLevelPkgDir : str) -> None:
+
+            absTopLevelPkgDir = \
+              os.path.abspath(
+                os.path.join(
+                  cls.__PossibleScriptDir,
+                  topLevelPkgDir))
+
+            def verifyExeScriptDirIsReachableFromTopLevelPackage() -> None:
+                if builtins.len(
+                  os.path.commonprefix(
+                    [absTopLevelPkgDir, cls.__PossibleScriptDir])) > 0:
+                        return None
+                else:
+                    raise ExecutingScript.InvalidTopLevelPackage()
+
+            cls.__VerifyInitialization()
+            verifyExeScriptDirIsReachableFromTopLevelPackage()
+
+            def calculateQualifiedPkgNameForExeScript() -> str:
+                exeScriptPkgPathRelativeToTopLevelPkg = \
+                  [os.path.basename(cls.__PossibleScriptDir)]
+
+                exeScriptAncestorPath = cls.__PossibleScriptDir;
+                while(not os.path.samefile(
+                        absTopLevelPkgDir,
+                        exeScriptAncestorPath) ):
+
+                    exeScriptAncestorPath = \
+                      os.path.dirname(cls.__PossibleScriptDir)
+
+                    exeScriptPkgPathRelativeToTopLevelPkg.insert(
+                      0,
+                      os.path.basename(exeScriptAncestorPath))
+
+                return '.'.join(exeScriptPkgPathRelativeToTopLevelPkg)
+
+            mainModule = sys.modules['__main__']
+
+            mainModule.__package__ = calculateQualifiedPkgNameForExeScript()
+
+            absTopLevelPkgParentDir = os.path.dirname(absTopLevelPkgDir)
+            if absTopLevelPkgParentDir not in sys.path:
+                sys.path.insert(1, absTopLevelPkgParentDir)
+
+            topLevelPkgName = os.path.basename(absTopLevelPkgDir)
+            __import__(topLevelPkgName)
 
         @classmethod
         def __VerifyInitialization(cls):
