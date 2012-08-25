@@ -9,8 +9,8 @@ if __name__ == '__main__':
             scriptListner()
 
         from ExecutingScript import *
-        ExecutingScript.init('initThrowDueToReinitialization')
-        ExecutingScript.init('initThrowDueToReinitialization')
+        ExecutingScript.init('initThrowDueToReinitialization_PyUnit')
+        ExecutingScript.init('initThrowDueToReinitialization_PyUnit')
 
     # Catch all exceptions, and test for specific kind later.
     except Exception as ex:
