@@ -30,7 +30,13 @@ testfiles=
 if [ $# -eq 2 -a "$2" = '--all' ]
 then
     testfiles=(\
-        $(find "${my_abs_parentpath}" -name "*PyUnit.py" -type f -maxdepth 1) )
+        $(find "${my_abs_parentpath}" \
+            -name "*PyUnit.py" \
+            -type f \
+            -maxdepth 1\
+            -print0 \
+          | \
+            xargs -0 echo) )
 else
     testfiles=("${@:2}")
 fi
@@ -38,7 +44,7 @@ fi
 pythonExe="$1"
 for ((argIndx=0; argIndx < ${#testfiles[@]}; ++argIndx))
 do
-    pyScript="${testfiles[${argIndex}]}"
+    pyScript="${testfiles[${argIndx}]}"
     pyScriptAbsParentPath="$( cd "$( dirname "${pyScript}" )" && pwd )"
     pyScriptName="$(basename "${pyScript}")"
     cmd=("${pythonExe}" "${pyScriptName}" "${pyScriptAbsParentPath}")
