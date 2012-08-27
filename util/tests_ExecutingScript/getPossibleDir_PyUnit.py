@@ -2,12 +2,7 @@
 
 # This test should only be run as an executable.
 if __name__ == '__main__':
-
-    def scriptBroadcaster(scriptListner):
-        scriptListner()
-
     from ExecutingScript import *
-    ExecutingScript.init('getPossibleDir_PyUnit')
 
     import unittest
     import sys

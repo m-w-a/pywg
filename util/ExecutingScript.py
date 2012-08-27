@@ -4,67 +4,47 @@ import sys
 import os
 import builtins
 import types
+import functools as ft
+
+class _ModuleInitMngr:
+    __DidInit = False
+    __Initors = []
+
+    @classmethod
+    def addInitor(cls, initor) -> None:
+        cls.__Initors.append(initor)
+        return None
+
+    @classmethod
+    def initAll(cls) -> None:
+        if not cls.__DidInit:
+            for initor in cls.__Initors:
+                initor()
+
+            cls.__DidInit = True
+
+        return None
 
 class ExecutingScript:
     """
-    Utility class to aid in retrieving info about the executing python script,
-    aka, the "script".
+    Utility class to aid the use of the currently executing python script.
 
-    Use of this class requires that the executing script define the following
-    function prior to importing this module:
-
-      def scriptBroadcaster(scriptListner):
-          scriptListner()
-
-    Use of this script requires the executing script:
-      1) Have this module as its first import.
-      2) Immediately after importing this module, to call this class's init 
-         function.
+    Use of this script requires the executing script to:
+      1) To import this module before any other modules and before executing
+         any other lines of code.
     """
 
-    class UninitializedError(Exception): pass
-    class AlreadyInitializedError(Exception): pass
-    class RequirementUnsatisfiedError(Exception): pass
     class InvalidTopLevelPackage(Exception): pass
-
-    @classmethod
-    def init(cls, scriptNameAsModule : str) -> None:
-        """
-        Class initializer.
-
-        scriptNameAsModule:
-          The executing script's module name. Note, this is the variable with 
-          the same name as the scripts' filename minus the file extension, and
-          is NOT the same thing as the variable __name__, since most likely 
-          __name__ == '__main__'.
-
-        Throws:
-          RequirementUnsatisfiedError:
-            If __main__ module is missing the function scriptBroadcaster, as
-            described in this class's documentation.
-          AlreadyInitializedError:
-            If this function has already been called, then this exception is
-            raised.
-
-        This should be the first function called in the executing script.
-        """
-        cls.__Impl.init(scriptNameAsModule)
 
     @classmethod
     def getPossibleDir(cls) -> str or None:
         """
         Try getting the script directory, taking into account all corner cases.
 
-        scriptNameAttr:
-          The executing scripts __name__ attribute.
-
         Returns:
           None if unable to get the executing scripts directory, else
           An absolute path that may or may NOT be the scripts directory (for the
           reasons why, consult "The Algorithm" section below).
-
-        Throws:
-          UninitializedError
 
         The Algorithm:
         --------------
@@ -86,6 +66,11 @@ class ExecutingScript:
           exist for the script run from the prompt.
           Note, this may return a false path in Windows if os.chdir() was
           executed before this class was initialized.
+
+        Note:
+          sys.path[0] is not a robust solution.  It will fail for t2.py that
+          was spawned off as a subprocess of t1.py, giving the directory of
+          t1.py regardless of where t2.py resides.
         """
 
         return cls.__Impl.getPossibleDir()
@@ -108,47 +93,20 @@ class ExecutingScript:
     class __Impl:
 
         __DidInit = False
-        __ScriptModuleProper = None
         __ExecutingScriptModule = None
         __PossibleScriptDir = None
-        __RequiredScriptBroadCasterFuncName = 'scriptBroadcaster'
 
         @classmethod
-        def init(cls, scriptNameAsModule : str) -> None:
-            def verifyMainModuleHasRequiredAttributes() -> None:
-                mainModule = sys.modules['__main__']
-                requiredAttr = \
-                  getattr(
-                    mainModule, 
-                    cls.__RequiredScriptBroadCasterFuncName,
-                    mainModule)
-                if requiredAttr is not mainModule:
-                    if builtins.type(requiredAttr) is not types.FunctionType:
-                        errMsg = \
-                        "__main__ module attribute: '{0}' must be of "\
-                        "type function".format(
-                          __RequiredScriptBroadCasterFuncName)
-                        raise ExecutingScriopt.RequirementUnsatisfiedError(
-                          errMsg)
-                else:
-                    errMsg = \
-                      '__main__ module missing the following attributes: {0}'\
-                      .format(cls.__RequiredScriptBroadCasterFuncName)
-                    raise ExecutingScript.RequirementUnsatisfiedError(errMsg)
-
+        def init(cls) -> None:
             if cls.__DidInit:
-                raise ExecutingScript.AlreadyInitializedError()
+                return None
 
-            verifyMainModuleHasRequiredAttributes()
-
-            cls.__ScriptModuleProper = sys.modules.get(scriptNameAsModule)
             cls.__ExecutingScriptModule = sys.modules['__main__']
             cls.__PossibleScriptDir = cls.__tryGettingDir()
             cls.__DidInit = True
 
         @classmethod
         def getPossibleDir(cls) -> str or None:
-            cls.__VerifyInitialization()
             return cls.__PossibleScriptDir
 
         @classmethod
@@ -168,7 +126,6 @@ class ExecutingScript:
                 else:
                     raise ExecutingScript.InvalidTopLevelPackage()
 
-            cls.__VerifyInitialization()
             verifyExeScriptDirIsReachableFromTopLevelPackage()
 
             def calculateQualifiedPkgNameForExeScript() -> str:
@@ -201,11 +158,6 @@ class ExecutingScript:
             __import__(topLevelPkgName)
 
         @classmethod
-        def __VerifyInitialization(cls):
-            if not cls.__DidInit:
-                raise ExecutingScript.UninitializedError()
-
-        @classmethod
         def __tryGettingDir(cls) -> str or None:
 
             def ifFrozenThenGetScriptDir() ->  str or None:
@@ -231,27 +183,28 @@ class ExecutingScript:
             def tryGettingScriptDirFromCallStack() -> str or None:
 
                 scriptDir = None
+                try:
+                    import inspect
 
-                def scriptListner() -> None:
-                    try:
-                        import inspect
+                    frameStack = inspect.stack()
 
-                        frame = inspect.stack()[1]
+                    if frameStack is not None:
+                        for frame in frameStack:
+                            try:
+                                nameAttr = '__name__'
+                                if nameAttr in frame[0].f_globals:
+                                    if frame[0].f_globals[nameAttr] == '__main__':
+                                        scriptDir = \
+                                          os.path.abspath( \
+                                            os.path.dirname( \
+                                              frame[1]))
+                                        break
+                            finally:
+                                del frame
+                finally:
+                    del frameStack
+                    del inspect
 
-                        if frame is not None:
-                            # The script module should be the only one calling
-                            # this function, so the calling the frame should 
-                            # contain the correct filepath of the script.
-                            nonlocal scriptDir
-                            scriptDir = \
-                              os.path.abspath(os.path.dirname(frame[1]))
-
-                    finally:
-                        del inspect
-                        # Always delete frames when done with them.
-                        del frame
-
-                cls.__ExecutingScriptModule.scriptBroadcaster(scriptListner)
                 return scriptDir
 
             def tryGettingScriptDirFromSysArgv() -> str or None:
@@ -261,16 +214,6 @@ class ExecutingScript:
                     return os.path.abspath(os.path.dirname(scriptDirStr))
                 else:
                     return None
-
-            def tryGettingScriptDirFromScriptModuleProperFileAttr() \
-              -> str or None:
-
-                if cls.__ScriptModuleProper is not None:
-                    return os.path.abspath(
-                      os.path.dirname(
-                        cls.__ScriptModuleProper.__file__))
-
-                return None
 
             def tryGettingScriptDirFromExecutingScriptFileAttr() \
               -> str or None:
@@ -292,8 +235,12 @@ class ExecutingScript:
             if toRet is None:
                 toRet = tryGettingScriptDirFromSysArgv()
             if toRet is None:
-                toRet = tryGettingScriptDirFromScriptModuleProperFileAttr()
-            if toRet is None:
                 toRet = tryGettingScriptDirFromExecutingScriptFileAttr()
 
             return toRet
+
+    __InitRegistration = \
+      _ModuleInitMngr.addInitor(ft.partial(__Impl.init))
+
+if __name__ != '__main__':
+    _ModuleInitMngr.initAll()
