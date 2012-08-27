@@ -34,7 +34,7 @@ class ExecutingScript:
          any other lines of code.
     """
 
-    class InvalidTopLevelPackage(Exception): pass
+    class InvalidTopLevelPackageError(Exception): pass
 
     @classmethod
     def getPossibleDir(cls) -> str or None:
@@ -84,7 +84,7 @@ class ExecutingScript:
           should be referenced to.
 
         Throws:
-          InvalidTopLevelPackage
+          InvalidTopLevelPackageError
             If topLevelPkgDir is not an ancestor path of the executing script
             directory, then above exception is raised.
         """
@@ -112,41 +112,45 @@ class ExecutingScript:
         @classmethod
         def allowRelativePaths(cls, topLevelPkgDir : str) -> None:
 
-            absTopLevelPkgDir = \
-              os.path.abspath(
-                os.path.join(
-                  cls.__PossibleScriptDir,
-                  topLevelPkgDir))
-
             def verifyExeScriptDirIsReachableFromTopLevelPackage() -> None:
                 if builtins.len(
                   os.path.commonprefix(
                     [absTopLevelPkgDir, cls.__PossibleScriptDir])) > 0:
                         return None
                 else:
-                    raise ExecutingScript.InvalidTopLevelPackage()
-
-            verifyExeScriptDirIsReachableFromTopLevelPackage()
+                    raise ExecutingScript.InvalidTopLevelPackageError()
 
             def calculateQualifiedPkgNameForExeScript() -> str:
-                exeScriptPkgPathRelativeToTopLevelPkg = \
-                  [os.path.basename(cls.__PossibleScriptDir)]
+                if mainModule.__package__ is None:
+                    exeScriptPkgPathRelativeToTopLevelPkg = \
+                      [os.path.basename(cls.__PossibleScriptDir)]
 
-                exeScriptAncestorPath = cls.__PossibleScriptDir;
-                while(not os.path.samefile(
+                    exeScriptAncestorPath = cls.__PossibleScriptDir;
+                    while(
+                      not os.path.samefile(
                         absTopLevelPkgDir,
                         exeScriptAncestorPath) ):
 
-                    exeScriptAncestorPath = \
-                      os.path.dirname(cls.__PossibleScriptDir)
+                        exeScriptAncestorPath = \
+                          os.path.dirname(cls.__PossibleScriptDir)
 
-                    exeScriptPkgPathRelativeToTopLevelPkg.insert(
-                      0,
-                      os.path.basename(exeScriptAncestorPath))
+                        exeScriptPkgPathRelativeToTopLevelPkg.insert(
+                          0,
+                          os.path.basename(exeScriptAncestorPath))
 
-                return '.'.join(exeScriptPkgPathRelativeToTopLevelPkg)
+                    return '.'.join(exeScriptPkgPathRelativeToTopLevelPkg)
+                else:
+                    return mainModule.__package__
+
+            absTopLevelPkgDir = \
+              os.path.abspath(
+                os.path.join(
+                  cls.__PossibleScriptDir,
+                  topLevelPkgDir))
 
             mainModule = sys.modules['__main__']
+
+            verifyExeScriptDirIsReachableFromTopLevelPackage()
 
             mainModule.__package__ = calculateQualifiedPkgNameForExeScript()
 
@@ -154,8 +158,7 @@ class ExecutingScript:
             if absTopLevelPkgParentDir not in sys.path:
                 sys.path.insert(1, absTopLevelPkgParentDir)
 
-            topLevelPkgName = os.path.basename(absTopLevelPkgDir)
-            __import__(topLevelPkgName)
+            __import__(mainModule.__package__)
 
         @classmethod
         def __tryGettingDir(cls) -> str or None:
@@ -181,7 +184,6 @@ class ExecutingScript:
                 return None
 
             def tryGettingScriptDirFromCallStack() -> str or None:
-
                 scriptDir = None
                 try:
                     import inspect
