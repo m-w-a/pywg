@@ -78,6 +78,14 @@ class ExecutingScript:
     @classmethod
     def allowRelativePaths(cls, topLevelPkgDir : str) -> None:
         """
+        Allows relative imports in the executing python script.
+
+        Requirements:
+          All directories that will be relatively imported from need to be
+          designated as packages by having a possibly empty __init__.py file.
+
+          Must be called before any relative imports take place.
+
         topLevelPkgDir:
           Relative parent path to the executing script, indicating the directory
           of the top level package that relative imports in the executing script
