@@ -87,14 +87,15 @@ class ExecutingScript:
           Must be called before any relative imports take place.
 
         topLevelPkgDir:
-          Relative parent path to the executing script, indicating the directory
+          Relative ancestor path to the executing script, or the current
+          directory designated by '.', indicating the directory
           of the top level package that relative imports in the executing script
           should be referenced to.
 
         Throws:
           InvalidTopLevelPackageError
-            If topLevelPkgDir is not an ancestor path of the executing script
-            directory, then above exception is raised.
+            If topLevelPkgDir is not the same directory as nor an ancestor path
+            of the executing script directory, then above exception is raised.
         """
         return cls.__Impl.allowRelativePaths(topLevelPkgDir)
 
