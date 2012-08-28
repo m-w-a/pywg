@@ -122,8 +122,10 @@ class ExecutingScript:
 
             def verifyExeScriptDirIsReachableFromTopLevelPackage() -> None:
                 if builtins.len(
-                  os.path.commonprefix(
-                    [absTopLevelPkgDir, cls.__PossibleScriptDir])) > 0:
+                    os.path.commonprefix(
+                      [absTopLevelPkgDir, cls.__PossibleScriptDir])) > 0 \
+                  and builtins.len(absTopLevelPkgDir) <= \
+                      builtins.len(cls.__PossibleScriptDir):
                         return None
                 else:
                     raise ExecutingScript.InvalidTopLevelPackageError()
