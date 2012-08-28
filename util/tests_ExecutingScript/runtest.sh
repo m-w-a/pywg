@@ -33,7 +33,6 @@ then
         $(find "${my_abs_parentpath}" \
             -name "*_PyUnit.py" \
             -type f \
-            -maxdepth 1\
             -print0 \
           | \
             xargs -0 echo) )
