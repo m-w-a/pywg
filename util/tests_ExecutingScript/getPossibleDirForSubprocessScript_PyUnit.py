@@ -13,7 +13,6 @@ if __name__ == '__main__':
         __TestRunnerName = 'runtest.sh'
         __TestRunnerPath = os.path.sep.join([__ThisScriptsDir, __TestRunnerName])
         __PythonExe = 'python3.2'
-        __SubprocessScriptName = 'getPossibleDir_PyUnit.py'
 
         def setup(self):
             pass
@@ -22,8 +21,23 @@ if __name__ == '__main__':
             cls = self.__class__
 
             subprocScriptDir = cls.__ThisScriptsDir
+            subprocScriptName = 'getPossibleDir_PyUnit.py'
             subprocScriptPath = \
-              os.path.sep.join([subprocScriptDir, cls.__SubprocessScriptName])
+              os.path.sep.join([subprocScriptDir, subprocScriptName])
+
+            cmdBldr = [cls.__TestRunnerPath, cls.__PythonExe, subprocScriptPath]
+            subprocRetCode = subprocess.call(cmdBldr)
+            self.assertEqual(0, subprocRetCode)
+
+        def test_scriptInSubDir(self):
+            cls = self.__class__
+
+            subprocScriptDirName = 'tests_getPossibleDirForSubprocessScript'
+            subprocScriptDir = \
+              os.path.sep.join([cls.__ThisScriptsDir, subprocScriptDirName])
+            subprocScriptName = 'getPossibleDir_PyUnit_NoAutoExecute.py'
+            subprocScriptPath = \
+              os.path.sep.join([subprocScriptDir, subprocScriptName])
 
             cmdBldr = [cls.__TestRunnerPath, cls.__PythonExe, subprocScriptPath]
             subprocRetCode = subprocess.call(cmdBldr)

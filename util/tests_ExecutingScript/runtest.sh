@@ -31,7 +31,7 @@ if [ $# -eq 2 -a "$2" = '--all' ]
 then
     testfiles=(\
         $(find "${my_abs_parentpath}" \
-            -name "*PyUnit.py" \
+            -name "*_PyUnit.py" \
             -type f \
             -maxdepth 1\
             -print0 \
