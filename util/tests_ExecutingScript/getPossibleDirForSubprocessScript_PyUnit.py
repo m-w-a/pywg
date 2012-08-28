@@ -21,7 +21,7 @@ if __name__ == '__main__':
             cls = self.__class__
 
             subprocScriptDir = cls.__ThisScriptsDir
-            subprocScriptName = 'getPossibleDir_PyUnit.py'
+            subprocScriptName = 'getPossibleDir_PyUnit_NoAutoExecute.py'
             subprocScriptPath = \
               os.path.sep.join([subprocScriptDir, subprocScriptName])
 
