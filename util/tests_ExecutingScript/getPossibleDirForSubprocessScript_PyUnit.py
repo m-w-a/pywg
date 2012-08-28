@@ -9,8 +9,10 @@ if __name__ == '__main__':
 
     class Test_getPossibleDirInSubprocess(unittest.TestCase):
 
-        __PythonExe = 'python3.2'
         __ThisScriptsDir = sys.argv[1]
+        __TestRunnerName = 'runtest.sh'
+        __TestRunnerPath = os.path.sep.join([__ThisScriptsDir, __TestRunnerName])
+        __PythonExe = 'python3.2'
         __SubprocessScriptName = 'getPossibleDir_PyUnit.py'
 
         def setup(self):
@@ -18,10 +20,12 @@ if __name__ == '__main__':
 
         def test_scriptInCurrentDir(self):
             cls = self.__class__
+
             subprocScriptDir = cls.__ThisScriptsDir
             subprocScriptPath = \
               os.path.sep.join([subprocScriptDir, cls.__SubprocessScriptName])
-            cmdBldr = [cls.__PythonExe, subprocScriptPath, subprocScriptDir]
+
+            cmdBldr = [cls.__TestRunnerPath, cls.__PythonExe, subprocScriptPath]
             subprocRetCode = subprocess.call(cmdBldr)
             self.assertEqual(0, subprocRetCode)
 
