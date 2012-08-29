@@ -12,7 +12,7 @@ if __name__ == '__main__':
 
     import unittest
 
-    class Test_allowRelativePathsThrowTopLevelPackageErrorDueToChildImport(
+    class Test_allowRelativePathsThrowDueToChildTopLevelPackage(
       unittest.TestCase):
 
         def test(self):
