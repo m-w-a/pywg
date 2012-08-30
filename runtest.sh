@@ -1,11 +1,13 @@
 #!/bin/bash
 
+#------------------------------------------------------------------------------#
+# Bash script to aid in running tests via unittest's import mechanism.
+#------------------------------------------------------------------------------#
+
 usageMsg="\
 Usage:
-  runtest.sh \
-    <python-executable> \
-    <testfile1 [testfile2 ...]> \
-    [unittest options]"
+  runtest.sh <python-executable> <testfile1 [testfile2 ...]> [unittest options]
+  runtest.sh <python-executable> --all <directory>"
 
 if [ \( $# -eq 0 \) -o \
      \( $# -eq 1 -a "$1" = "--help" \) ]
@@ -20,7 +22,45 @@ my_abs_parentpath="$( cd "$( dirname "$my_abs_filepath" )" && pwd )"
 pythonExe="$1"
 packageDir="${my_abs_parentpath}"
 
-cmd=("${pythonExe}" -m unittest discover -t "${packageDir}" -p "${@:2}")
+if [ $# -eq 3 -a "$2" = '--all' ]
+then
+    dirToStartSearch="$3"
+    if [ ! -d "${dirToStartSearch}" ]
+    then
+        echo "Argument 3 must specify a directory."
+        exit 1
+    fi
 
-echo "${cmd[@]}"
-eval "${cmd[@]}"
+    run()
+    {
+        pythonExe="$1"
+        packageDir="$2"
+        test="$3"
+
+        cmd=()
+        if [ -f runtest.sh ]
+        then
+            cmd=(bash ./runtest.sh "${pythonExe}" --all)
+        else
+            cmd=(
+                "${pythonExe}" -m unittest
+                discover
+                -t "${packageDir}"
+                -p "${test}")
+        fi
+
+        echo "${cmd[@]}"
+        eval "${cmd[@]}"
+    }
+
+    export -f run
+
+    find "${dirToStartSearch}" \
+        -name "*_PyUnit.py" \
+        -type f \
+        -execdir bash -c "run "${pythonExe}" "${packageDir}" "{}"" ';'
+else
+    cmd=("${pythonExe}" -m unittest discover -t "${packageDir}" -p "${@:2}")
+    echo "${cmd[@]}"
+    eval "${cmd[@]}"
+fi
