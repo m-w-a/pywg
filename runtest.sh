@@ -20,7 +20,7 @@ my_abs_parentpath="$( cd "$( dirname "$my_abs_filepath" )" && pwd )"
 pythonExe="$1"
 packageDir="${my_abs_parentpath}"
 
-cmd=("${pythonExe}" -m unittest discover -t "${packageDir}" -p "$@")
+cmd=("${pythonExe}" -m unittest discover -t "${packageDir}" -p "${@:2}")
 
 echo "${cmd[@]}"
 eval "${cmd[@]}"
