@@ -122,11 +122,11 @@ class ExecutingScript:
         def allowRelativePaths(cls, topLevelPkgDir : str) -> None:
 
             def verifyExeScriptDirIsReachableFromTopLevelPackage() -> None:
-                if builtins.len(
-                    os.path.commonprefix(
-                      [absTopLevelPkgDir, cls.__PossibleScriptDir])) > 0 \
-                  and builtins.len(absTopLevelPkgDir) <= \
-                      builtins.len(cls.__PossibleScriptDir):
+                commonPathPrefix = \
+                  os.path.commonprefix(
+                    [absTopLevelPkgDir, cls.__PossibleScriptDir])
+                if builtins.len(commonPathPrefix) > 0 \
+                  and commonPathPrefix == absTopLevelPkgDir:
                         return None
                 else:
                     raise ExecutingScript.InvalidTopLevelPackageError()
@@ -134,22 +134,15 @@ class ExecutingScript:
             def calculateQualifiedPkgNameForExeScript() -> str:
                 if mainModule.__package__ is None:
                     exeScriptPkgPathRelativeToTopLevelPkg = \
-                      [os.path.basename(cls.__PossibleScriptDir)]
+                      (cls.__PossibleScriptDir.partition(
+                        os.path.dirname(
+                          absTopLevelPkgDir))[2]).split(os.path.sep)
 
-                    exeScriptAncestorPath = cls.__PossibleScriptDir;
-                    while(
-                      not os.path.samefile(
-                        absTopLevelPkgDir,
-                        exeScriptAncestorPath) ):
-
-                        exeScriptAncestorPath = \
-                          os.path.dirname(cls.__PossibleScriptDir)
-
-                        exeScriptPkgPathRelativeToTopLevelPkg.insert(
-                          0,
-                          os.path.basename(exeScriptAncestorPath))
-
-                    return '.'.join(exeScriptPkgPathRelativeToTopLevelPkg)
+                    return \
+                      '.'.join(
+                        filter(
+                          lambda x: x != '',
+                            exeScriptPkgPathRelativeToTopLevelPkg))
                 else:
                     return mainModule.__package__
 
