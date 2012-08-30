@@ -7,8 +7,8 @@
 
 usageMsg="\
 Usage: runtest.sh --help
-Usage: runtest.sh python-executable --all
-Usage: runtest.sh python-executable testfile(s)
+Usage: runtest.sh <python-executable> --all
+Usage: runtest.sh <python-executable> <testfile1 [testfile2 ...]>
 
 Second form executes all tests of the form '*PyUnit.py' in the directory which
 this script is found.
