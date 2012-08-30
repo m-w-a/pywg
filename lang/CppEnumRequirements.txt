@@ -1,0 +1,36 @@
+Requirements
+------------
+Enumeration class attributes will be referred to as enumeration constants.
+
+Pre-MetaClass Processing:
+  Enumeration class can only inherit from class object.
+  Enumeration constants must be valid Python identifiers.
+
+  Enumeration constants must be of type int or Ellipsis at the point of declaration.
+
+Post-MetaClass Processing:
+  Enumeration Constants
+  ---------------------
+  Enumeration constants shall be instances of their enclosing class type.
+
+  Enumeration constants shall have attribute Name which evaluates to the string representation of their lexical identifier prepended by the comboniation of their enclosing class name and ".".
+  Enumeration constants will have attribute Value which evaluates to:
+    i) 0, if its instance was the first attribute declared in the enumeration class and is of type ellipsis, else
+    ii) j.Value + 1, if its instance is of type ellipsis, where j is the previously declared enumeration constant, else
+    iii) the integer value its instance was originally declared with.
+  
+  Enumeration constants shall implement the special method __str__. The returned string will have the same value as the instance attribute Name.
+  Enumeration constants shall implement the special method __int__. The returned integer will have the same value as the attribute Value.
+
+  Enumeration constants shall be hashed on their ValueS attribute.
+  Enumeration constants shall have a total order based on their ValueS attribute.
+
+  Enumeration constants shall be read-only.
+
+  Enumeration constants shall be pickable.
+
+  Enumeration Classes
+  -------------------
+  Enumeration classes shall be read-only.
+  Enumeration classes shall not be instantiable by clients.
+  Enumeration classes shall be iterable over their enumeration constants. The order of iteration will reflect the order of enumeration constant declarations of each class.
