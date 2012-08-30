@@ -1,6 +1,6 @@
 #! /usr/bin/env python3.2
 
-from _Enum import *
+from .._Enum import *
 import builtins
 import unittest
 import codeop
