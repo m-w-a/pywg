@@ -1,5 +1,6 @@
 import unittest
-from .._addStaticMarkerIfNotPresent import *
+import types
+from .. import *
 
 class Test_addStaticMarkerIfNotPresent(unittest.TestCase):
 
