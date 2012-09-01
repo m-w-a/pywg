@@ -91,9 +91,9 @@ class Test_EnumConstantsMustBeValidPythonIdentifiers(unittest.TestCase):
             Lexus12 = 32
 
         class IdsWithDigitsAndUnderscores(metaclass=Enum):
-            class_of_98 = 1998
-            ClassOf_98 = 1998
-            Class_Of_98 = 1998
+            class_of_1 = 1
+            ClassOf_2 = 2
+            Class_Of_3 = 3
 
     def test_notOkIfInvalidIds(self) -> None:
         with self.assertRaises(SyntaxError):
@@ -294,9 +294,145 @@ class Test_EnumConstantsAreOfTypeEnum(unittest.TestCase):
         self.assertIsInstance((Color.Magenta), Color)
         self.assertIsInstance((Color.Cyan), Color)
 
-#class Test_EnumConstantAttributeRelatedTests(unittest.TestCase):
-    #def test_ValueRelatedAttributes(self) -> None:
+# R5
+class Test_EnumConstantAttributeRelatedTests(unittest.TestCase):
 
+    # R5.1.*
+    def test_NameRelatedAttributes(self) -> None:
+        class MyEnum(metaclass=Enum):
+            R = ...
+            Green = 10
+            Camry = Green + 11
+            To_Yoooota = ...
+
+        self.assertEqual(MyEnum.R.Name, 'MyEnum.R')
+        self.assertEqual(str(MyEnum.R), MyEnum.R.Name)
+
+        self.assertEqual(MyEnum.Green.Name, 'MyEnum.Green')
+        self.assertEqual(str(MyEnum.Green), MyEnum.Green.Name)
+
+        self.assertEqual(MyEnum.Camry.Name, 'MyEnum.Camry')
+        self.assertEqual(str(MyEnum.Camry), MyEnum.Camry.Name)
+
+        self.assertEqual(MyEnum.To_Yoooota.Name, 'MyEnum.To_Yoooota')
+        self.assertEqual(str(MyEnum.To_Yoooota), MyEnum.To_Yoooota.Name)
+
+    # R5.2*
+    def test_ValueRelatedAttributes(self) -> None:
+
+        def testInitialEnumConstAssignedEllipsis() -> None:
+            class PlasmaTv(metaclass=Enum):
+                R = ...
+
+            self.assertEqual(PlasmaTv.R.Value, 0)
+            self.assertEqual(int(PlasmaTv.R), PlasmaTv.R.Value)
+
+        def testInitialEnumConstNotAssignedEllipses() -> None:
+
+            def testInitialEnumConstAssignedZero() -> None:
+                class PlasmaTv(metaclass=Enum):
+                    R = 0
+
+                self.assertEqual(PlasmaTv.R.Value, 0)
+                self.assertEqual(int(PlasmaTv.R), PlasmaTv.R.Value)
+
+            def testInitialEnumConstAssignedNonZero() -> None:
+                class PlasmaTv(metaclass=Enum):
+                    R = 10
+
+                self.assertEqual(PlasmaTv.R.Value, 10)
+                self.assertEqual(int(PlasmaTv.R), PlasmaTv.R.Value)
+
+            testInitialEnumConstAssignedZero()
+            testInitialEnumConstAssignedNonZero()
+
+        def testConsecutiveAssignmentsOfSameType() -> None:
+
+            def testConsecutiveEllipseAssignments() -> None:
+                class PlasmaTv(metaclass=Enum):
+                    R = ...
+                    G = ...
+
+                self.assertEqual(PlasmaTv.R.Value, 0)
+                self.assertEqual(int(PlasmaTv.R), PlasmaTv.R.Value)
+
+                self.assertEqual(PlasmaTv.G.Value, 1)
+                self.assertEqual(int(PlasmaTv.G), PlasmaTv.G.Value)
+
+            def testConsecutiveIntAssignments() -> None:
+                class PlasmaTv(metaclass=Enum):
+                    R = 52
+                    G = 9
+
+                self.assertEqual(PlasmaTv.R.Value, 52)
+                self.assertEqual(int(PlasmaTv.R), PlasmaTv.R.Value)
+
+                self.assertEqual(PlasmaTv.G.Value, 9)
+                self.assertEqual(int(PlasmaTv.G), PlasmaTv.G.Value)
+
+            testConsecutiveEllipseAssignments()
+            testConsecutiveIntAssignments()
+
+        def testIntExpression() -> None:
+            class PlasmaTv(metaclass=Enum):
+                R = 1
+                B = 10
+                G = R + B
+
+            self.assertEqual(PlasmaTv.G.Value, 11)
+            self.assertEqual(int(PlasmaTv.G), PlasmaTv.G.Value)
+
+        def testAssignmentOfEnumConst() -> None:
+            class PlasmaTv(metaclass=Enum):
+                R = 1
+                G = R
+
+            self.assertEqual(PlasmaTv.G.Value, PlasmaTv.R.Value)
+            self.assertEqual(int(PlasmaTv.G), PlasmaTv.G.Value)
+
+        def testComboOfAllPreviousCases() -> None:
+            class PlasmaTv(metaclass=Enum):
+                R = ...
+                G = 1
+                B = 11
+                Magenta = ...
+                Cyan = G + B
+                Velvet = ...
+                SkyBlue = ...
+                Grass = G
+
+            self.assertEqual(PlasmaTv.R.Value, 0)
+            self.assertEqual(int(PlasmaTv.R), PlasmaTv.R.Value)
+
+            self.assertEqual(PlasmaTv.G.Value, 1)
+            self.assertEqual(int(PlasmaTv.G), PlasmaTv.G.Value)
+
+            self.assertEqual(PlasmaTv.B.Value, 11)
+            self.assertEqual(int(PlasmaTv.B), PlasmaTv.B.Value)
+
+            self.assertEqual(PlasmaTv.Magenta.Value, 12)
+            self.assertEqual(int(PlasmaTv.Magenta), PlasmaTv.Magenta.Value)
+
+            self.assertEqual(PlasmaTv.Cyan.Value, 12)
+            self.assertEqual(int(PlasmaTv.Cyan), PlasmaTv.Cyan.Value)
+
+            self.assertEqual(PlasmaTv.Velvet.Value, 13)
+            self.assertEqual(int(PlasmaTv.Velvet), PlasmaTv.Velvet.Value)
+
+            self.assertEqual(PlasmaTv.SkyBlue.Value, 14)
+            self.assertEqual(int(PlasmaTv.SkyBlue), PlasmaTv.SkyBlue.Value)
+
+            self.assertEqual(PlasmaTv.Grass.Value, 1)
+            self.assertEqual(
+              int(PlasmaTv.Grass),
+              PlasmaTv.Grass.Value)
+
+        testInitialEnumConstAssignedEllipsis()
+        testInitialEnumConstNotAssignedEllipses()
+        testConsecutiveAssignmentsOfSameType()
+        testIntExpression()
+        testAssignmentOfEnumConst()
+        testComboOfAllPreviousCases()
 
 if __name__ == '__main__':
     unittest.main()
