@@ -5,6 +5,7 @@ import builtins
 import unittest
 import codeop
 
+# R1
 class Test_EnumCanOnlyInheritFromClassObject(unittest.TestCase):
 
     def setUp(self): pass
@@ -37,45 +38,45 @@ class Test_EnumCanOnlyInheritFromClassObject(unittest.TestCase):
         testEmptyBaseClass()
         testObjectAsSoleDeclaredBaseClass()
 
+    def test_notOkIfSoleBaseClassNotObject(self) -> None:
+
+        expectedErrMsgSubStr = 'has base classes other than object'
+
+        with self.assertRaisesRegex(TypeError, expectedErrMsgSubStr):
+            class Color(int, metaclass=Enum):
+                pass
+
+        with self.assertRaisesRegex(TypeError, expectedErrMsgSubStr):
+            class Color(float, metaclass=Enum):
+                R = 1
+
+        with self.assertRaisesRegex(TypeError, expectedErrMsgSubStr):
+            class Color(Exception, metaclass=Enum):
+                R = 1
+                G = 2
+
     def test_notOkIfMultiplyInherit(self) -> None:
 
         expectedErrMsgSubStr = 'has base classes other than object'
 
-        def testBaseClassNotObject() -> None:
-            with self.assertRaisesRegex(TypeError, expectedErrMsgSubStr):
-                class Color(int, metaclass=Enum):
-                    pass
+        with self.assertRaisesRegex(TypeError, expectedErrMsgSubStr):
+            class Color(int, float, metaclass=Enum):
+                pass
 
-            with self.assertRaisesRegex(TypeError, expectedErrMsgSubStr):
-                class Color(float, metaclass=Enum):
-                    R = 1
+        with self.assertRaisesRegex(TypeError, expectedErrMsgSubStr):
+            class Color(int, float, str, metaclass=Enum):
+                pass
 
-            with self.assertRaisesRegex(TypeError, expectedErrMsgSubStr):
-                class Color(Exception, metaclass=Enum):
-                    R = 1
-                    G = 2
+        with self.assertRaisesRegex(TypeError, expectedErrMsgSubStr):
+            class Color(int, float, metaclass=Enum):
+                R = 1
 
-        def testMultipleBaseClasses() -> None:
-            with self.assertRaisesRegex(TypeError, expectedErrMsgSubStr):
-                class Color(int, float, metaclass=Enum):
-                    pass
+        with self.assertRaisesRegex(TypeError, expectedErrMsgSubStr):
+            class Color(int, float, Exception, metaclass=Enum):
+                R = 1
+                G = 2
 
-            with self.assertRaisesRegex(TypeError, expectedErrMsgSubStr):
-                class Color(int, float, str, metaclass=Enum):
-                    pass
-
-            with self.assertRaisesRegex(TypeError, expectedErrMsgSubStr):
-                class Color(int, float, metaclass=Enum):
-                    R = 1
-
-            with self.assertRaisesRegex(TypeError, expectedErrMsgSubStr):
-                class Color(int, float, Exception, metaclass=Enum):
-                    R = 1
-                    G = 2
-
-        testBaseClassNotObject()
-        testMultipleBaseClasses()
-
+# R2
 class Test_EnumConstantsMustBeValidPythonIdentifiers(unittest.TestCase):
 
     def test_okIfValidIds(self) -> None:
@@ -105,9 +106,13 @@ class Test_EnumConstantsMustBeValidPythonIdentifiers(unittest.TestCase):
               'class Class(metaclass=Enum):'\
               '  1998 = 1998')
 
+# R3
 class Test_EnumConstantsMustBeOfTypeIntOrEllipsis(unittest.TestCase):
+
     def test_okIfOfTypeIntOrEllipsis(self) -> None:
-        def test_okIfOfTypeInt() -> None:
+
+        def testOkIfOfTypeInt() -> None:
+
             def testPlainNumbers() -> None:
                 class MonoChrome(metaclass=Enum):
                     R = 1
@@ -129,7 +134,7 @@ class Test_EnumConstantsMustBeOfTypeIntOrEllipsis(unittest.TestCase):
             testPlainNumbers()
             testExpressions()
 
-        def test_okIfOfTypeEllipsis() -> None:
+        def testOkIfOfTypeEllipsis() -> None:
             class MonoChrome(metaclass=Enum):
                 R = ...
 
@@ -138,7 +143,7 @@ class Test_EnumConstantsMustBeOfTypeIntOrEllipsis(unittest.TestCase):
                 G = ...
                 B = ...
 
-        def test_okIfBothOfTypeIntOrEllipsis() -> None:
+        def testOkIfBothOfTypeIntOrEllipsis() -> None:
             class HDTV(metaclass=Enum):
                 R = ...
                 G = 1
@@ -152,9 +157,9 @@ class Test_EnumConstantsMustBeOfTypeIntOrEllipsis(unittest.TestCase):
                 Cyan = G + B
                 Velvet = ...
 
-        test_okIfOfTypeInt()
-        test_okIfOfTypeEllipsis()
-        test_okIfBothOfTypeIntOrEllipsis()
+        testOkIfOfTypeInt()
+        testOkIfOfTypeEllipsis()
+        testOkIfBothOfTypeIntOrEllipsis()
 
     def test_notOkIfNotOfTypeIntNorEllipsis(self):
 
@@ -272,7 +277,9 @@ class Test_EnumConstantsMustBeOfTypeIntOrEllipsis(unittest.TestCase):
         testUnmixedMultipleInvalidTypes()
         testMixedMultipleInvalidTypes()
 
+# R4
 class Test_EnumConstantsAreOfTypeEnum(unittest.TestCase):
+
     def test_typeEnumConstTypes(self) -> None:
         class Color(metaclass=Enum):
             R = ...
@@ -281,11 +288,11 @@ class Test_EnumConstantsAreOfTypeEnum(unittest.TestCase):
             Magenta = B + G
             Cyan = builtins.len(['Crayola'])
 
-        self.assertIs(type(Color.R), Color)
-        self.assertIs(type(Color.G), Color)
-        self.assertIs(type(Color.B), Color)
-        self.assertIs(type(Color.Magenta), Color)
-        self.assertIs(type(Color.Cyan), Color)
+        self.assertIsInstance((Color.R), Color)
+        self.assertIsInstance((Color.G), Color)
+        self.assertIsInstance((Color.B), Color)
+        self.assertIsInstance((Color.Magenta), Color)
+        self.assertIsInstance((Color.Cyan), Color)
 
 #class Test_EnumConstantAttributeRelatedTests(unittest.TestCase):
     #def test_ValueRelatedAttributes(self) -> None:
