@@ -17,19 +17,40 @@ then
 fi
 
 my_abs_filepath="${BASH_SOURCE[0]}"
-my_abs_parentpath="$( cd "$( dirname "$my_abs_filepath" )" && pwd )"
+my_abs_parentpath="$( cd "$( dirname "${my_abs_filepath}" )" && pwd )"
 
 pythonExe="$1"
 packageDir="${my_abs_parentpath}"
 
 if [ $# -eq 3 -a "$2" = '--all' ]
 then
-    dirToStartSearch="$3"
-    if [ ! -d "${dirToStartSearch}" ]
+    if [ ! -d "$3" ]
     then
         echo "Argument 3 must specify a directory."
         exit 1
     fi
+
+    dirToStartSearch="$3"
+
+    subRunnersList=( \
+        $(find "${dirToStartSearch}" \
+            -name runtest.sh \
+            -type f \
+            -mindepth 2 \
+            -print0 \
+          | \
+            xargs -0 echo) )
+
+    subRunnersDirList=()
+    pruneSubStmt=''
+    for subRunner in "${subRunnersList[@]}"
+    do
+        subDir="$(dirname "${subRunner}")"
+        subDirsToPrune="${subDir}/*"
+
+        subRunnersDirList+=("${subDir}")
+        pruneSubStmt=""${pruneSubStmt}" -not -path \""${subDirsToPrune}"\""
+    done
 
     run()
     {
@@ -37,28 +58,36 @@ then
         packageDir="$2"
         test="$3"
 
-        cmd=()
-        if [ -f runtest.sh ]
-        then
-            cmd=(bash ./runtest.sh "${pythonExe}" --all)
-        else
-            cmd=(
-                "${pythonExe}" -m unittest
-                discover
-                -t "${packageDir}"
-                -p "${test}")
-        fi
+        cmd=("${pythonExe}"
+            -m unittest discover
+              -t "${packageDir}"
+              -p "${test}")
 
+        currentDir="$(cd "$(dirname "${test}")" && pwd)"
+        echo "cd ${currentDir}"
         echo "${cmd[@]}"
         eval "${cmd[@]}"
     }
 
     export -f run
 
-    find "${dirToStartSearch}" \
-        -name "*_PyUnit.py" \
-        -type f \
-        -execdir bash -c "run "${pythonExe}" "${packageDir}" "{}"" ';'
+    cmd=(find "${dirToStartSearch}" 
+        "${pruneSubStmt}" 
+        -name "\"*_PyUnit.py\""
+        -type f 
+        -execdir bash -c
+            "\"run "${pythonExe}" "\"${packageDir}\"" \"{}\" \""
+            "\";\"")
+
+    echo "${cmd[@]}"
+    eval "${cmd[@]}"
+
+    for subRunnerDir in "${subRunnersDirList[@]}"
+    do
+        cmd=(cd "${subRunnerDir};" bash "./runtest.sh" "${pythonExe}" "--all")
+        echo "${cmd[@]}"
+        eval "${cmd[@]}"
+    done
 else
     cmd=("${pythonExe}" -m unittest discover -t "${packageDir}" -p "${@:2}")
     echo "${cmd[@]}"
