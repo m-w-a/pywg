@@ -91,6 +91,8 @@ class Enum(type):
                         builtins.setattr(cls, attrName, enumConst)
 
             def addClassFunctions(cls) -> None:
+                def __init__(self):
+                    raise TypeError('Illegal operation.')
                 def __str__(self): return self.Name
                 def __int__(self): return self.Value
                 def __eq__(self, other):
@@ -107,6 +109,7 @@ class Enum(type):
                 def __delattr__(self, name):
                     raise TypeError('Illegal operation.')
 
+                cls.__init__ = __init__
                 cls.__str__ = __str__
                 cls.__int__ = __int__
                 cls.__eq__ = __eq__
@@ -120,7 +123,21 @@ class Enum(type):
             addClassData(cls)
             addClassFunctions(cls)
 
+        def overrideMetaClassSpecialFunctions(cls) -> None:
+            """
+            This should be the last method called on this class.
+            """
+
+            def __setattr__(self, name, value):
+                raise TypeError('Illegal operation.')
+            def __delattr__(self, name):
+                raise TypeError('Illegal operation.')
+
+            cls.__class__.__setattr__ = __setattr__
+            cls.__class__.__delattr__ = __delattr__
+
         addClassAttributes(cls)
+        overrideMetaClassSpecialFunctions(cls)
 
     @staticmethod
     def __isPythonSpecialName(name : str) -> bool:
