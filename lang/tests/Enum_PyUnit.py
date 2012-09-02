@@ -1,6 +1,6 @@
 #! /usr/bin/env python3.2
 
-from .. import *
+from .. import Enum
 import builtins
 import unittest
 import codeop
@@ -433,6 +433,83 @@ class Test_EnumConstantAttributeRelatedTests(unittest.TestCase):
         testIntExpression()
         testAssignmentOfEnumConst()
         testComboOfAllPreviousCases()
+
+    # R6
+    def test_EnumConstantsHashedOnValuesAttribute(self) -> None:
+        class Color(metaclass=Enum):
+            R = 1
+            G = ...
+
+        self.assertEqual(builtins.hash(Color.R), hash(1))
+        self.assertEqual(builtins.hash(Color.G), hash(2))
+
+    # R7
+    def test_EnumConstantsTotallyOrderedOnValuesAttribute(self) -> None:
+        class PlasmaTv(metaclass=Enum):
+            R = ...
+            G = 1
+            B = 11
+            Magenta = ...
+            Cyan = G + B
+            Velvet = ...
+            SkyBlue = ...
+            Grass = G
+
+        enumConsts = \
+          [
+            PlasmaTv.R, PlasmaTv.G, PlasmaTv.B, PlasmaTv.Magenta, PlasmaTv.Cyan,
+            PlasmaTv.Velvet, PlasmaTv.SkyBlue, PlasmaTv.Grass
+          ]
+
+        for enumConst_j in enumConsts:
+            for enumConst_k in enumConsts:
+                if enumConst_j.Value < enumConst_k.Value:
+                    self.assertLess(enumConst_j, enumConst_k)
+                if enumConst_j.Value <= enumConst_k.Value:
+                    self.assertLessEqual(enumConst_j, enumConst_k)
+                if enumConst_j.Value == enumConst_k.Value:
+                    self.assertEqual(enumConst_j, enumConst_k)
+                if enumConst_j.Value >= enumConst_k.Value:
+                    self.assertGreaterEqual(enumConst_j, enumConst_k)
+                if enumConst_j.Value > enumConst_k.Value:
+                    self.assertGreater(enumConst_j, enumConst_k)
+
+    # R8
+    def test_EnumConstantsAreReadOnly(self) -> None:
+        class Color(metaclass=Enum):
+            R = 1
+            G = ...
+
+        expectedErrMsgSubStr = 'Illegal operation.'
+
+        def testEnumConstsNotAssignable() -> None:
+            with self.assertRaisesRegex(TypeError, expectedErrMsgSubStr):
+                Color.R.Name = "Rouge"
+
+            with self.assertRaisesRegex(TypeError, expectedErrMsgSubStr):
+                Color.R.Value = 11
+
+            with self.assertRaisesRegex(TypeError, expectedErrMsgSubStr):
+                Color.G.Name = 'Grass'
+
+            with self.assertRaisesRegex(TypeError, expectedErrMsgSubStr):
+                Color.G.Value = 12
+
+        def testEnumConstsNotDeletable() -> None:
+            with self.assertRaisesRegex(TypeError, expectedErrMsgSubStr):
+                del Color.R.Name
+
+            with self.assertRaisesRegex(TypeError, expectedErrMsgSubStr):
+                del Color.R.Value
+
+            with self.assertRaisesRegex(TypeError, expectedErrMsgSubStr):
+                del Color.G.Name
+
+            with self.assertRaisesRegex(TypeError, expectedErrMsgSubStr):
+                del Color.G.Value
+
+        testEnumConstsNotAssignable()
+        testEnumConstsNotDeletable()
 
 if __name__ == '__main__':
     unittest.main()
