@@ -59,60 +59,68 @@ class Enum(type):
     # clsName:
     #   The name of cls as a string.
     # bases:
-    #   a list of the cls’s base classes (excluding object, and therefore
+    #   a list of the class's base classes (excluding object, and therefore
     #   possibly empty)
     # dict:
     #   cls's class attributes.
     def __init__(cls, clsName, bases, dxnry):
         super().__init__(clsName, bases, dxnry)
 
-        def addClassData(cls, clsName, dxnry) -> None:
-            lastEnumConstValue = -1
-            for attr in dxnry.items():
-                attrName = attr[0]
-                attrObj = attr[1]
-                if not cls.__class__.__isPythonSpecialName(attrName):
-                    enumConst = cls()
-                    enumConst.Name = '{clsName}.{attrName}'.format(**locals())
+        def addClassAttributes(cls) -> None:
 
-                    if type(attrObj) == int:
-                        enumConst.Value = attrObj
-                    else:
-                        enumConst.Value = lastEnumConstValue + 1
+            def addClassData(cls) -> None:
+                # Bring into local scope.
+                # For use with locals().
+                clsName
+                lastEnumConstValue = -1
+                for attr in dxnry.items():
+                    attrName = attr[0]
+                    attrObj = attr[1]
+                    if not cls.__class__.__isPythonSpecialName(attrName):
+                        enumConst = cls()
+                        enumConst.Name = \
+                          '{clsName}.{attrName}'.format(**locals())
 
-                    lastEnumConstValue = enumConst.Value
+                        if type(attrObj) == int:
+                            enumConst.Value = attrObj
+                        else:
+                            enumConst.Value = lastEnumConstValue + 1
 
-                    builtins.setattr(cls, attrName, enumConst)
+                        lastEnumConstValue = enumConst.Value
 
-        def addClassFunctions(cls, clsName, dxnry) -> None:
-            def __str__(self): return self.Name
-            def __int__(self): return self.Value
-            def __eq__(self, other):
-                if not builtins.isinstance(other, self.__class__):
-                    return NotImplemented
-                return self.Value == other.Value
-            def __hash__(self): return builtins.hash(self.Value)
-            def __lt__(self, other):
-                if not builtins.isinstance(other, self.__class__):
-                    return NotImplemented
-                return self.Value < other.Value
-            def __setattr__(self, name, value):
-                raise TypeError('Illegal operation.')
-            def __delattr__(self, name):
-                raise TypeError('Illegal operation.')
+                        builtins.setattr(cls, attrName, enumConst)
 
-            cls.__str__ = __str__
-            cls.__int__ = __int__
-            cls.__eq__ = __eq__
-            cls.__hash__ = __hash__
-            cls.__lt__ = __lt__
-            cls.__setattr__ = __setattr__
-            cls.__delattr__ = __delattr__
+            def addClassFunctions(cls) -> None:
+                def __str__(self): return self.Name
+                def __int__(self): return self.Value
+                def __eq__(self, other):
+                    if not builtins.isinstance(other, self.__class__):
+                        return NotImplemented
+                    return self.Value == other.Value
+                def __hash__(self): return builtins.hash(self.Value)
+                def __lt__(self, other):
+                    if not builtins.isinstance(other, self.__class__):
+                        return NotImplemented
+                    return self.Value < other.Value
+                def __setattr__(self, name, value):
+                    raise TypeError('Illegal operation.')
+                def __delattr__(self, name):
+                    raise TypeError('Illegal operation.')
 
-            cls = functools.total_ordering(cls)
+                cls.__str__ = __str__
+                cls.__int__ = __int__
+                cls.__eq__ = __eq__
+                cls.__hash__ = __hash__
+                cls.__lt__ = __lt__
+                cls.__setattr__ = __setattr__
+                cls.__delattr__ = __delattr__
 
-        addClassData(cls, clsName, dxnry)
-        addClassFunctions(cls, clsName, dxnry)
+                cls = functools.total_ordering(cls)
+
+            addClassData(cls)
+            addClassFunctions(cls)
+
+        addClassAttributes(cls)
 
     @staticmethod
     def __isPythonSpecialName(name : str) -> bool:
