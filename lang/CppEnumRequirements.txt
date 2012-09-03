@@ -29,12 +29,12 @@ Post-MetaClass Processing:
   R6) Enumeration constants shall be hashed on their ValueS attribute.
   R7) Enumeration constants shall have a total order based on their ValueS attribute.
 
-  R8) Enumeration constants shall be read-only.
+  R8) Enumeration constants shall be attribute read-only.
 
   R9) Enumeration constants shall be pickable.
 
   Enumeration Classes
   -------------------
-  Enumeration classes shall be read-only.
-  Enumeration classes shall not be instantiable by clients.
+  R10) Enumeration classes shall not be instantiable by clients.
+  R11) Enumeration classes shall be attribute read-only.
   Enumeration classes shall be iterable over their enumeration constants. The order of iteration will reflect the order of enumeration constant declarations of each class.

@@ -5,6 +5,7 @@ import collections
 import functools
 
 class Enum(type):
+
     @classmethod
     def __prepare__(mcls, clsName, bases, **kwds):
         return collections.OrderedDict()
@@ -15,9 +16,11 @@ class Enum(type):
     #   The name of the class to be created.
     # bases:
     #   a list of the clsName's declared base classes
-    # dxn:
+    # dxnry:
     #   clsName's attributes.
     def __new__(mcls, clsName, bases, dxnry):
+
+        mcls.__EnumSpecialMethods.allowForInternalUse(mcls)
 
         def checkClassToBeCreatedHasNoBaseClasses() -> None:
             if builtins.len(bases) > 0:
@@ -123,7 +126,37 @@ class Enum(type):
             addClassData(cls)
             addClassFunctions(cls)
 
-        def overrideMetaClassSpecialFunctions(cls) -> None:
+        addClassAttributes(cls)
+
+        mcls = cls.__class__
+        mcls.__EnumSpecialMethods.disallowForExternalUse(mcls)
+
+    @staticmethod
+    def __isPythonSpecialName(name : str) -> bool:
+        return name.startswith('__') and name.endswith('__')
+
+    class __EnumSpecialMethods:
+
+        @classmethod
+        def allowForInternalUse(cls, metacls) -> None:
+
+            def init() -> None:
+                nonlocal cls
+                if not cls.__DidInit:
+                    cls.__DidInit = True
+                    cls.__SetAttr = metacls.__setattr__
+                    cls.__DelAttr = metacls.__delattr__
+
+            def reinstateOriginals() -> None:
+                nonlocal metacls
+                metacls.__setattr__ = cls.__SetAttr
+                metacls.__delattr__ = cls.__DelAttr
+
+            init()
+            reinstateOriginals()
+
+        @classmethod
+        def disallowForExternalUse(cls, metacls) -> None:
             """
             This should be the last method called on this class.
             """
@@ -133,12 +166,9 @@ class Enum(type):
             def __delattr__(self, name):
                 raise TypeError('Illegal operation.')
 
-            cls.__class__.__setattr__ = __setattr__
-            cls.__class__.__delattr__ = __delattr__
+            metacls.__setattr__ = __setattr__
+            metacls.__delattr__ = __delattr__
 
-        addClassAttributes(cls)
-        overrideMetaClassSpecialFunctions(cls)
-
-    @staticmethod
-    def __isPythonSpecialName(name : str) -> bool:
-        return name.startswith('__') and name.endswith('__')
+        __DidInit = False
+        __SetAttr = None
+        __DelAttr = None

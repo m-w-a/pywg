@@ -434,8 +434,9 @@ class Test_EnumConstantAttributeRelatedTests(unittest.TestCase):
         testAssignmentOfEnumConst()
         testComboOfAllPreviousCases()
 
-    # R6
-    def test_EnumConstantsHashedOnValuesAttribute(self) -> None:
+# R6
+class Test_EnumConstantsHashedOnValuesAttribute(unittest.TestCase):
+    def test(self) -> None:
         class Color(metaclass=Enum):
             R = 1
             G = ...
@@ -443,8 +444,9 @@ class Test_EnumConstantAttributeRelatedTests(unittest.TestCase):
         self.assertEqual(builtins.hash(Color.R), hash(1))
         self.assertEqual(builtins.hash(Color.G), hash(2))
 
-    # R7
-    def test_EnumConstantsTotallyOrderedOnValuesAttribute(self) -> None:
+# R7
+class Test_EnumConstantsTotallyOrderedOnValuesAttribute(unittest.TestCase):
+    def test(self) -> None:
         class PlasmaTv(metaclass=Enum):
             R = ...
             G = 1
@@ -474,42 +476,59 @@ class Test_EnumConstantAttributeRelatedTests(unittest.TestCase):
                 if enumConst_j.Value > enumConst_k.Value:
                     self.assertGreater(enumConst_j, enumConst_k)
 
-    # R8
-    def test_EnumConstantsAreReadOnly(self) -> None:
-        class Color(metaclass=Enum):
-            R = 1
-            G = ...
+# R8
+class Test_EnumConstantsAttributesAreReadOnly(unittest.TestCase):
 
-        expectedErrMsgSubStr = 'Illegal operation.'
+    class __Color(metaclass=Enum):
+        R = 1
+        G = ...
 
-        def testEnumConstsNotAssignable() -> None:
-            with self.assertRaisesRegex(TypeError, expectedErrMsgSubStr):
-                Color.R.Name = "Rouge"
+    __ExpectedErrMsgSubStr = 'Illegal operation.'
 
-            with self.assertRaisesRegex(TypeError, expectedErrMsgSubStr):
-                Color.R.Value = 11
+    def test_AttributesNotAssignable(self) -> None:
+        cls = self.__class__
 
-            with self.assertRaisesRegex(TypeError, expectedErrMsgSubStr):
-                Color.G.Name = 'Grass'
+        with self.assertRaisesRegex(TypeError, cls.__ExpectedErrMsgSubStr):
+            cls.__Color.R.Name = "Rouge"
 
-            with self.assertRaisesRegex(TypeError, expectedErrMsgSubStr):
-                Color.G.Value = 12
+        with self.assertRaisesRegex(TypeError, cls.__ExpectedErrMsgSubStr):
+            cls.__Color.R.Value = 11
 
-        def testEnumConstsNotDeletable() -> None:
-            with self.assertRaisesRegex(TypeError, expectedErrMsgSubStr):
-                del Color.R.Name
+        with self.assertRaisesRegex(TypeError, cls.__ExpectedErrMsgSubStr):
+            cls.__Color.G.Name = 'Grass'
 
-            with self.assertRaisesRegex(TypeError, expectedErrMsgSubStr):
-                del Color.R.Value
+        with self.assertRaisesRegex(TypeError, cls.__ExpectedErrMsgSubStr):
+            cls.__Color.G.Value = 12
 
-            with self.assertRaisesRegex(TypeError, expectedErrMsgSubStr):
-                del Color.G.Name
+    def test_AttributesNotCreatable(self) -> None:
+        cls = self.__class__
 
-            with self.assertRaisesRegex(TypeError, expectedErrMsgSubStr):
-                del Color.G.Value
+        with self.assertRaisesRegex(TypeError, cls.__ExpectedErrMsgSubStr):
+            cls.__Color.SomeNewAttribute = "Newness"
 
-        testEnumConstsNotAssignable()
-        testEnumConstsNotDeletable()
+        with self.assertRaisesRegex(TypeError, cls.__ExpectedErrMsgSubStr):
+            cls.__Color.R2 = 2
+
+        with self.assertRaisesRegex(TypeError, cls.__ExpectedErrMsgSubStr):
+            cls.__Color.G2 = ...
+
+    def test_AttributesNotDeletable(self) -> None:
+        cls = self.__class__
+
+        with self.assertRaisesRegex(TypeError, cls.__ExpectedErrMsgSubStr):
+            del cls.__Color.R.Name
+
+        with self.assertRaisesRegex(TypeError, cls.__ExpectedErrMsgSubStr):
+            del cls.__Color.R.Value
+
+        with self.assertRaisesRegex(TypeError, cls.__ExpectedErrMsgSubStr):
+            del cls.__Color.G.Name
+
+        with self.assertRaisesRegex(TypeError, cls.__ExpectedErrMsgSubStr):
+            del cls.__Color.G.Value
+
+    # R10
+    # TODO.
 
 if __name__ == '__main__':
     unittest.main()
