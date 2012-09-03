@@ -527,8 +527,31 @@ class Test_EnumConstantsAttributesAreReadOnly(unittest.TestCase):
         with self.assertRaisesRegex(TypeError, cls.__ExpectedErrMsgSubStr):
             del cls.__Color.G.Value
 
-    # R10
-    # TODO.
+# R10
+class Test_EnumsNotClientInstantiable(unittest.TestCase):
+    __ExpectedErrMsgSubStr = 'Illegal operation.'
+
+    def test(self) -> None:
+        cls = self.__class__
+
+        with self.assertRaisesRegex(TypeError, cls.__ExpectedErrMsgSubStr):
+            class Color(metaclass=Enum):
+                pass
+
+            Color()
+
+        with self.assertRaisesRegex(TypeError, cls.__ExpectedErrMsgSubStr):
+            class Color(metaclass=Enum):
+                R = 1
+
+            Color()
+
+        with self.assertRaisesRegex(TypeError, cls.__ExpectedErrMsgSubStr):
+            class Color(metaclass=Enum):
+                R = ...
+                G = 1
+
+            Color()
 
 if __name__ == '__main__':
     unittest.main()
