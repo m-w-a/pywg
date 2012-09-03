@@ -504,13 +504,13 @@ class Test_EnumConstantsAttributesAreReadOnly(unittest.TestCase):
         cls = self.__class__
 
         with self.assertRaisesRegex(TypeError, cls.__ExpectedErrMsgSubStr):
-            cls.__Color.SomeNewAttribute = "Newness"
+            cls.__Color.R.SomeNewAttribute = "Newness"
 
         with self.assertRaisesRegex(TypeError, cls.__ExpectedErrMsgSubStr):
-            cls.__Color.R2 = 2
+            cls.__Color.G.Value2 = 2
 
         with self.assertRaisesRegex(TypeError, cls.__ExpectedErrMsgSubStr):
-            cls.__Color.G2 = ...
+            cls.__Color.G.Value2 = ...
 
     def test_AttributesNotDeletable(self) -> None:
         cls = self.__class__
