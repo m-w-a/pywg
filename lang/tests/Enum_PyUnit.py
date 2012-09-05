@@ -528,19 +528,19 @@ class Test_EnumConstantsAttributesAreImmutable(unittest.TestCase):
             del cls.__Color.G.Value
 
 # R9
-class _ColorForPickleTest(metaclass=Enum):
+class _ColorForEnumConstPickleTest(metaclass=Enum):
     R = 1
     G = ...
 
-class Test_EnumConstantsPickable(unittest.TestCase):
+class Test_EnumConstantsArePickable(unittest.TestCase):
     def test(self) -> None:
         from pickle import loads, dumps
 
-        r = loads(dumps(_ColorForPickleTest.R))
-        g = loads(dumps(_ColorForPickleTest.G))
+        r = loads(dumps(_ColorForEnumConstPickleTest.R))
+        g = loads(dumps(_ColorForEnumConstPickleTest.G))
 
-        self.assertEqual(_ColorForPickleTest.R, r)
-        self.assertEqual(_ColorForPickleTest.G, g)
+        self.assertEqual(_ColorForEnumConstPickleTest.R, r)
+        self.assertEqual(_ColorForEnumConstPickleTest.G, g)
 
 # R10
 class Test_EnumsNotClientInstantiable(unittest.TestCase):
@@ -666,6 +666,24 @@ class Test_EnumStrSpecialFunction(unittest.TestCase):
           "<class '{0}.Color': {{'Color.R': 1, 'Color.G': 2, 'Color.B': 13}}>"\
           .format(Color.__module__)
         self.assertEqual(builtins.str(Color), expectedEnumStr)
+
+# R14
+class _PlasmaTvForEnumPickleTest(metaclass=Enum):
+    R = ...
+    G = 1
+    B = 11
+    Magenta = ...
+    Cyan = G + B
+    Velvet = ...
+    SkyBlue = ...
+    Grass = G
+
+class Test_EnumsArePickable(unittest.TestCase):
+    def test(self) -> None:
+        from pickle import loads, dumps
+
+        pickledEnum = loads(dumps(_PlasmaTvForEnumPickleTest))
+        self.assertEqual(_PlasmaTvForEnumPickleTest, pickledEnum)
 
 if __name__ == '__main__':
     unittest.main()

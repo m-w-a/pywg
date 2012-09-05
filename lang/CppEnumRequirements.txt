@@ -46,3 +46,5 @@ Post-MetaClass Processing:
       enum_name = E.__name__
       enum_const0_name = E.e0.Name
       enum_const0_value = E.e0.Value
+
+  R14) Enumeration classes shall be pickable.
