@@ -20,7 +20,7 @@ class Enum(type):
     #   clsName's attributes.
     def __new__(mcls, clsName, bases, dxnry):
 
-        mcls.__EnumSpecialMethods.allowForInternalUse(mcls)
+        mcls.__MutableSpecialMethods.allowForInternalUse(mcls)
 
         def checkClassToBeCreatedHasNoBaseClasses() -> None:
             if builtins.len(bases) > 0:
@@ -131,7 +131,7 @@ class Enum(type):
         addClassAttributes(cls)
 
         mcls = cls.__class__
-        mcls.__EnumSpecialMethods.disallowForExternalUse(mcls)
+        mcls.__MutableSpecialMethods.disallowForExternalUse(mcls)
 
     def __iter__(cls):
         for enumConst in cls.__EnumConstants:
@@ -145,7 +145,7 @@ class Enum(type):
             cls.__name__,
             ', '.join(enums))
 
-    class __EnumSpecialMethods:
+    class __MutableSpecialMethods:
 
         @classmethod
         def allowForInternalUse(cls, metacls) -> None:
