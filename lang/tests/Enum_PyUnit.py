@@ -477,7 +477,7 @@ class Test_EnumConstantsTotallyOrderedOnValuesAttribute(unittest.TestCase):
                     self.assertGreater(enumConst_j, enumConst_k)
 
 # R8
-class Test_EnumConstantsAttributesAreReadOnly(unittest.TestCase):
+class Test_EnumConstantsAttributesAreImmutable(unittest.TestCase):
 
     class __Color(metaclass=Enum):
         R = 1
@@ -552,6 +552,42 @@ class Test_EnumsNotClientInstantiable(unittest.TestCase):
                 G = 1
 
             Color()
+
+# R11
+class Test_EnumAttributesAreImmutable(unittest.TestCase):
+
+    class __Color(metaclass=Enum):
+        R = 1
+        G = ...
+
+    __ExpectedErrMsgSubStr = 'Illegal operation.'
+
+    def test_AttributesNotAssignable(self) -> None:
+        cls = self.__class__
+
+        with self.assertRaisesRegex(TypeError, cls.__ExpectedErrMsgSubStr):
+            cls.__Color.R = 'Foo'
+
+        with self.assertRaisesRegex(TypeError, cls.__ExpectedErrMsgSubStr):
+            cls.__Color.G = cls.__Color.R
+
+    def test_AttributesNotCreatable(self) -> None:
+        cls = self.__class__
+
+        with self.assertRaisesRegex(TypeError, cls.__ExpectedErrMsgSubStr):
+            cls.__Color.SomeNewAttribute = ...
+
+        with self.assertRaisesRegex(TypeError, cls.__ExpectedErrMsgSubStr):
+            cls.__Color.SomeOtherNewAttribute = 1
+
+    def test_AttributesNotDeletable(self) -> None:
+        cls = self.__class__
+
+        with self.assertRaisesRegex(TypeError, cls.__ExpectedErrMsgSubStr):
+            del cls.__Color.R
+
+        with self.assertRaisesRegex(TypeError, cls.__ExpectedErrMsgSubStr):
+            del cls.__Color.G
 
 if __name__ == '__main__':
     unittest.main()
