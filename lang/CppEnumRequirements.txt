@@ -38,3 +38,11 @@ Post-MetaClass Processing:
   R10) Enumeration classes shall not be instantiable by clients.
   R11) Enumeration classes shall be attribute immutable.
   R12) Enumeration classes shall be iterable over their enumeration constants. The order of iteration will reflect the order of enumeration constant declarations of each class.
+  R13) Enumeration classes shall have a str representation of the form:
+    <class 'module_name.enum_name': {'enum_const0_name': enum_const0_value, ...}>
+
+    Where, for any given enumeration class E with enumeration constants of e0, e1, e2, ..., declared in lexicographical order,
+      module_name = E.__module__
+      enum_name = E.__name__
+      enum_const0_name = E.e0.Name
+      enum_const0_value = E.e0.Value

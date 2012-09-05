@@ -624,5 +624,33 @@ class Test_EnumIteration(unittest.TestCase):
 
         self.assertEqual(enumConstsFromIterator, enumConstsFromManualEntry)
 
+# R13
+class Test_EnumStrSpecialFunction(unittest.TestCase):
+    def test_EmptyEnum(self) -> None:
+        class Color(metaclass=Enum):
+            pass
+
+        expectedEnumStr = "<class '{0}.Color': {{}}>".format(Color.__module__)
+        self.assertEqual(builtins.str(Color), expectedEnumStr)
+
+    def test_EnumWithOneConst(self) -> None:
+        class Color(metaclass=Enum):
+            R = 1
+
+        expectedEnumStr = \
+          "<class '{0}.Color': {{'Color.R': 1}}>".format(Color.__module__)
+        self.assertEqual(builtins.str(Color), expectedEnumStr)
+
+    def test_EnumWithThreeConts(self) -> None:
+        class Color(metaclass=Enum):
+            R = 1
+            G = ...
+            B = 13
+
+        expectedEnumStr = \
+          "<class '{0}.Color': {{'Color.R': 1, 'Color.G': 2, 'Color.B': 13}}>"\
+          .format(Color.__module__)
+        self.assertEqual(builtins.str(Color), expectedEnumStr)
+
 if __name__ == '__main__':
     unittest.main()

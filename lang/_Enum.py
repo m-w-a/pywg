@@ -137,6 +137,14 @@ class Enum(type):
         for enumConst in cls.__EnumConstants:
                 yield enumConst
 
+    def __str__(cls) -> str:
+        enums = ["'{0}': {1}".format(enum.Name, enum.Value) for enum in cls]
+        return \
+          "<class '{0}.{1}': {{{2}}}>".format(
+            cls.__module__,
+            cls.__name__,
+            ', '.join(enums))
+
     class __EnumSpecialMethods:
 
         @classmethod
