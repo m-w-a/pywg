@@ -37,4 +37,4 @@ Post-MetaClass Processing:
   -------------------
   R10) Enumeration classes shall not be instantiable by clients.
   R11) Enumeration classes shall be attribute immutable.
-  Enumeration classes shall be iterable over their enumeration constants. The order of iteration will reflect the order of enumeration constant declarations of each class.
+  R12) Enumeration classes shall be iterable over their enumeration constants. The order of iteration will reflect the order of enumeration constant declarations of each class.

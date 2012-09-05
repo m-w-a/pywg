@@ -64,7 +64,7 @@ class Enum(type):
     # bases:
     #   a list of the class's base classes (excluding object, and therefore
     #   possibly empty)
-    # dict:
+    # dxnry:
     #   cls's class attributes.
     def __init__(cls, clsName, bases, dxnry):
         super().__init__(clsName, bases, dxnry)
@@ -75,6 +75,7 @@ class Enum(type):
                 # Bring into local scope.
                 # For use with locals().
                 clsName
+                cls.__EnumConstants = []
                 lastEnumConstValue = -1
                 for attr in dxnry.items():
                     attrName = attr[0]
@@ -92,6 +93,7 @@ class Enum(type):
                         lastEnumConstValue = enumConst.Value
 
                         builtins.setattr(cls, attrName, enumConst)
+                        cls.__EnumConstants.append(enumConst)
 
             def addClassFunctions(cls) -> None:
                 def __init__(self):
@@ -131,9 +133,9 @@ class Enum(type):
         mcls = cls.__class__
         mcls.__EnumSpecialMethods.disallowForExternalUse(mcls)
 
-    @staticmethod
-    def __isPythonSpecialName(name : str) -> bool:
-        return name.startswith('__') and name.endswith('__')
+    def __iter__(cls):
+        for enumConst in cls.__EnumConstants:
+                yield enumConst
 
     class __EnumSpecialMethods:
 
@@ -172,3 +174,7 @@ class Enum(type):
         __DidInit = False
         __SetAttr = None
         __DelAttr = None
+
+    @staticmethod
+    def __isPythonSpecialName(name : str) -> bool:
+        return name.startswith('__') and name.endswith('__')

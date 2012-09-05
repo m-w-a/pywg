@@ -589,5 +589,40 @@ class Test_EnumAttributesAreImmutable(unittest.TestCase):
         with self.assertRaisesRegex(TypeError, cls.__ExpectedErrMsgSubStr):
             del cls.__Color.G
 
+# R12
+class Test_EnumIteration(unittest.TestCase):
+    def test_EmptyEnum(self) -> None:
+        class Color(metaclass=Enum):
+            pass
+
+        for enumConsts in Color:
+            self.fail('Expected empty iteration.')
+
+    def test_NonEmptyEnum(self) -> None:
+        class PlasmaTv(metaclass=Enum):
+            R = ...
+            G = 1
+            B = 11
+            Magenta = ...
+            Cyan = G + B
+            Velvet = ...
+            SkyBlue = ...
+            Grass = G
+
+        enumConstsFromIterator = builtins.list(builtins.iter(PlasmaTv))
+        enumConstsFromManualEntry = \
+          [
+            PlasmaTv.R,
+            PlasmaTv.G,
+            PlasmaTv.B,
+            PlasmaTv.Magenta,
+            PlasmaTv.Cyan,
+            PlasmaTv.Velvet,
+            PlasmaTv.SkyBlue,
+            PlasmaTv.Grass
+          ]
+
+        self.assertEqual(enumConstsFromIterator, enumConstsFromManualEntry)
+
 if __name__ == '__main__':
     unittest.main()
