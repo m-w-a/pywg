@@ -527,6 +527,21 @@ class Test_EnumConstantsAttributesAreImmutable(unittest.TestCase):
         with self.assertRaisesRegex(TypeError, cls.__ExpectedErrMsgSubStr):
             del cls.__Color.G.Value
 
+# R9
+class _ColorForPickleTest(metaclass=Enum):
+    R = 1
+    G = ...
+
+class Test_EnumConstantsPickable(unittest.TestCase):
+    def test(self) -> None:
+        from pickle import loads, dumps
+
+        r = loads(dumps(_ColorForPickleTest.R))
+        g = loads(dumps(_ColorForPickleTest.G))
+
+        self.assertEqual(_ColorForPickleTest.R, r)
+        self.assertEqual(_ColorForPickleTest.G, g)
+
 # R10
 class Test_EnumsNotClientInstantiable(unittest.TestCase):
     __ExpectedErrMsgSubStr = 'Illegal operation.'
