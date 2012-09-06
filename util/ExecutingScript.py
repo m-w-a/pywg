@@ -56,11 +56,6 @@ class ExecutingScript:
         Else, try obtaining script filepath via sys.argv[0]. 
           Note, this may fail since in interactive mode sys.argv[0] will return 
           an empty string for any script run from the prompt.
-        Else, try the module script's __file__.
-          (Note, this presupposes that the script itself has been loaded as a
-          module, in addition to being run as an executable.)
-          Note, this may return a false path in Windows if os.chdir() was
-          executed before this class was initialized.
         Else, try the executing script's __file__.
           Note, this may fail since in interactive mode the __file__ will not
           exist for the script run from the prompt.
