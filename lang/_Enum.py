@@ -4,6 +4,9 @@ import builtins
 import collections
 import functools
 
+class _ErrorMsg:
+    IllegalOperation = 'Illegal operation.'
+
 class Enum(type):
 
     @classmethod
@@ -80,7 +83,7 @@ class Enum(type):
                 for attr in dxnry.items():
                     attrName = attr[0]
                     attrObj = attr[1]
-                    if not cls.__class__.__isPythonSpecialName(attrName):
+                    if not mcls.__isPythonSpecialName(attrName):
                         enumConst = cls()
                         enumConst.Name = \
                           '{clsName}.{attrName}'.format(**locals())
@@ -97,7 +100,7 @@ class Enum(type):
 
             def addClassFunctions(cls) -> None:
                 def __init__(self):
-                    raise TypeError('Illegal operation.')
+                    raise TypeError(_ErrorMsg.IllegalOperation)
                 def __str__(self): return self.Name
                 def __int__(self): return self.Value
                 def __eq__(self, other):
@@ -110,9 +113,9 @@ class Enum(type):
                         return NotImplemented
                     return self.Value < other.Value
                 def __setattr__(self, name, value):
-                    raise TypeError('Illegal operation.')
+                    raise TypeError(_ErrorMsg.IllegalOperation)
                 def __delattr__(self, name):
-                    raise TypeError('Illegal operation.')
+                    raise TypeError(_ErrorMsg.IllegalOperation)
 
                 cls.__init__ = __init__
                 cls.__str__ = __str__
@@ -128,9 +131,10 @@ class Enum(type):
             addClassData(cls)
             addClassFunctions(cls)
 
+        mcls = cls.__class__
+
         addClassAttributes(cls)
 
-        mcls = cls.__class__
         mcls.__MutableSpecialMethods.disallowForExternalUse(mcls)
 
     def __iter__(cls):
@@ -172,9 +176,9 @@ class Enum(type):
             """
 
             def __setattr__(self, name, value):
-                raise TypeError('Illegal operation.')
+                raise TypeError(_ErrorMsg.IllegalOperation)
             def __delattr__(self, name):
-                raise TypeError('Illegal operation.')
+                raise TypeError(_ErrorMsg.IllegalOperation)
 
             metacls.__setattr__ = __setattr__
             metacls.__delattr__ = __delattr__
