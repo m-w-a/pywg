@@ -3,7 +3,7 @@
 import types
 import builtins
 
-class StaticProxy:
+class StaticInitor:
     """
     A proxy class for functions and methods to aid in defining local static
     variables. Any attributes added to instances of this class will become
@@ -11,7 +11,7 @@ class StaticProxy:
 
     Usage:
       def foo():
-          static = StaticProxy(foo)
+          static = StaticInitor(foo)
           static.StaticVar1 = lambda ...
           static.StaticVar2 = function identifier ...
           ...

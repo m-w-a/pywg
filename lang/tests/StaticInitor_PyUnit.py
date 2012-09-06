@@ -5,7 +5,7 @@ from .. import *
 class Test_StaticVariables(unittest.TestCase):
     def test_creation(self) -> None:
         def foo() -> None:
-            static = StaticProxy(foo)
+            static = StaticInitor(foo)
             static.Var1 = lambda: 'StaticVar_1'
             pass
 
