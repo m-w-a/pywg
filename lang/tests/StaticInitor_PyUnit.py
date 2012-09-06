@@ -14,7 +14,7 @@ class Test_StaticVariables(unittest.TestCase):
         self.assertTrue(builtins.hasattr(foo, 'Var1'))
         self.assertEqual(foo.Var1, var1Value)
 
-    def test_creationInMethod(self) -> None:
+    def test_creationAndAssignmentInMethod(self) -> None:
         class Bar:
             def foo(self):
                 static = StaticInitor(Bar.foo)

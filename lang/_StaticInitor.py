@@ -17,9 +17,9 @@ class StaticInitor:
           ...
 
     Note:
-      The instance attributes of this class should only be assigned lambda or
-      function expressions, that when evaluated with no parameters shall return
-      the desired initialization value for said attributes.
+      The instance attributes of this class should only be assigned lambda,
+      function, or method expressions, that when evaluated with no parameters 
+      shall return the desired initialization value for said attributes.
 
     Throws:
       TypeError
@@ -48,7 +48,7 @@ class StaticInitor:
     def __setattr__(
       self,
       name : str,
-      valueProxy : (types.LambdaType, types.FunctionType) ) \
+      valueProxy : (types.LambdaType, types.FunctionType, types.MethodType) ) \
         -> None:
 
         if builtins.getattr(self.__Func, name, self.__Func) is self.__Func:
