@@ -51,10 +51,12 @@ class StaticInitor:
       valueProxy : (types.LambdaType, types.FunctionType, types.MethodType) ) \
         -> None:
 
+        cls = self.__class__
+
         if builtins.getattr(self.__Func, name, self.__Func) is self.__Func:
             builtins.setattr(self.__Func, name, valueProxy())
         else:
-            raise ReinitializationError()
+            raise cls.ReinitializationError()
 
     def __delattr__(self, name):
         cls = self.__class__
