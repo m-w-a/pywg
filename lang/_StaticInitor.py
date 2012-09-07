@@ -27,8 +27,8 @@ class StaticInitor:
         On any attempts to delete attributes on this class.
 
         Rationale:
-          Since this is just a proxy class with a very specific purpose,
-          all operations complemental to but tangential to said purpose shall
+          Since this is a proxy class with a very specific purpose,
+          all operations complemental with but tangential to said purpose shall
           be disallowed for the sake of clarity.
 
       ReinitializationError

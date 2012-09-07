@@ -79,5 +79,31 @@ class Test_GettingAttributesRaisesError(unittest.TestCase):
         with self.assertRaisesRegex(TypeError, cls.__ErrMsgSubStr):
             Bar().foo()
 
+class Test_DeletingAttributesRaisesError(unittest.TestCase):
+    __ErrMsgSubStr = 'Illegal operation.'
+
+    def test_functionStaticVariables(self) -> None:
+        def foo() -> None:
+            static = StaticInitor(foo)
+            static.Var1 = lambda: '1'
+
+            del static.Var1
+
+        cls = self.__class__
+        with self.assertRaisesRegex(TypeError, cls.__ErrMsgSubStr):
+            foo()
+
+    def test_methodStaticVariables(self) -> None:
+        class Bar:
+            def foo(self):
+                static = StaticInitor(Bar.foo)
+                static.Var1 = lambda: 1
+
+                del static.Var1
+
+        cls = self.__class__
+        with self.assertRaisesRegex(TypeError, cls.__ErrMsgSubStr):
+            Bar().foo()
+
 if __name__ == '__main__':
     unittest.main()
