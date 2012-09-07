@@ -5,8 +5,8 @@ from .. import *
 class Test_StaticVariableCreationAndAssignment(unittest.TestCase):
     def test_functionStaticVariables(self) -> None:
         def foo() -> None:
-            static = StaticInitor(foo)
-            static.Var1 = lambda: var1Value
+            initStatic = StaticInitor(foo)
+            initStatic.Var1 = lambda: var1Value
 
         var1Value = 'StaticVar_1'
 
@@ -17,9 +17,9 @@ class Test_StaticVariableCreationAndAssignment(unittest.TestCase):
     def test_methodStaticVariables(self) -> None:
         class Bar:
             def foo(self):
-                static = StaticInitor(Bar.foo)
-                static.Var1 = lambda: var1Value
-                static.Var2 = lambda: var2Value
+                initStatic = StaticInitor(Bar.foo)
+                initStatic.Var1 = lambda: var1Value
+                initStatic.Var2 = lambda: var2Value
 
         var1Value = 'StaticVar_1'
         var2Value = 10
@@ -35,9 +35,9 @@ class Test_StaticVariableCreationAndAssignment(unittest.TestCase):
 class Test_StaticVariableReinitializationRaisesError(unittest.TestCase):
     def test_functionStaticVariables(self) -> None:
         def foo() -> None:
-            static = StaticInitor(foo)
-            static.Var1 = lambda: '1'
-            static.Var1 = lambda: 1
+            initStatic = StaticInitor(foo)
+            initStatic.Var1 = lambda: '1'
+            initStatic.Var1 = lambda: 1
 
         with self.assertRaises(StaticInitor.ReinitializationError):
             foo()
@@ -45,9 +45,9 @@ class Test_StaticVariableReinitializationRaisesError(unittest.TestCase):
     def test_methodStaticVariables(self) -> None:
         class Bar:
             def foo(self):
-                static = StaticInitor(Bar.foo)
-                static.Var1 = lambda: '1'
-                static.Var1 = lambda: 1
+                initStatic = StaticInitor(Bar.foo)
+                initStatic.Var1 = lambda: '1'
+                initStatic.Var1 = lambda: 1
 
         with self.assertRaises(StaticInitor.ReinitializationError):
             Bar().foo()
@@ -58,10 +58,10 @@ class Test_GettingAttributesRaisesError(unittest.TestCase):
 
     def test_functionStaticVariables(self) -> None:
         def foo() -> None:
-            static = StaticInitor(foo)
-            static.Var1 = lambda: '1'
+            initStatic = StaticInitor(foo)
+            initStatic.Var1 = lambda: '1'
 
-            ref = static.Var1
+            ref = initStatic.Var1
 
         cls = self.__class__
         with self.assertRaisesRegex(TypeError, cls.__ErrMsgSubStr):
@@ -70,10 +70,10 @@ class Test_GettingAttributesRaisesError(unittest.TestCase):
     def test_methodStaticVariables(self) -> None:
         class Bar:
             def foo(self):
-                static = StaticInitor(Bar.foo)
-                static.Var1 = lambda: 1
+                initStatic = StaticInitor(Bar.foo)
+                initStatic.Var1 = lambda: 1
 
-                ref = static.Var1
+                ref = initStatic.Var1
 
         cls = self.__class__
         with self.assertRaisesRegex(TypeError, cls.__ErrMsgSubStr):
@@ -84,10 +84,10 @@ class Test_DeletingAttributesRaisesError(unittest.TestCase):
 
     def test_functionStaticVariables(self) -> None:
         def foo() -> None:
-            static = StaticInitor(foo)
-            static.Var1 = lambda: '1'
+            initStatic = StaticInitor(foo)
+            initStatic.Var1 = lambda: '1'
 
-            del static.Var1
+            del initStatic.Var1
 
         cls = self.__class__
         with self.assertRaisesRegex(TypeError, cls.__ErrMsgSubStr):
@@ -96,10 +96,10 @@ class Test_DeletingAttributesRaisesError(unittest.TestCase):
     def test_methodStaticVariables(self) -> None:
         class Bar:
             def foo(self):
-                static = StaticInitor(Bar.foo)
-                static.Var1 = lambda: 1
+                initStatic = StaticInitor(Bar.foo)
+                initStatic.Var1 = lambda: 1
 
-                del static.Var1
+                del initStatic.Var1
 
         cls = self.__class__
         with self.assertRaisesRegex(TypeError, cls.__ErrMsgSubStr):
