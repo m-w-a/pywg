@@ -110,7 +110,28 @@ class Test_StaticVariablesBehaveStatically(unittest.TestCase):
         self.assertEqual(Bar().foo(), 2)
 
 class Test_StaticVariableReinitializationSilentlyFails(unittest.TestCase):
-    pass #TODO
+    def test_functionStaticVariables(self) -> None:
+        def foo():
+            static = StaticInitor(foo)
+            static.Var1 = lambda: 0
+            static.Var1 = lambda: '0'
+
+            return foo.Var1
+
+        self.assertEqual(foo(), 0)
+        self.assertEqual(foo(), 0)
+
+    def test_methodStaticVariables(self) -> None:
+        class Bar:
+            def foo(self):
+                static = StaticInitor(Bar.foo)
+                static.Var1 = lambda: 0
+                static.Var1 = lambda: '0'
+
+                return Bar.foo.Var1
+
+        self.assertEqual(Bar().foo(), 0)
+        self.assertEqual(Bar().foo(), 0)
 
 if __name__ == '__main__':
     unittest.main()
