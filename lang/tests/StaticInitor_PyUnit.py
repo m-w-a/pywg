@@ -5,8 +5,8 @@ from .. import *
 class Test_StaticVariableCreationAndAssignment(unittest.TestCase):
     def test_functionStaticVariables(self) -> None:
         def foo() -> None:
-            initStatic = StaticInitor(foo)
-            initStatic.Var1 = lambda: var1Value
+            static = StaticInitor(foo)
+            static.Var1 = lambda: var1Value
 
         var1Value = 'StaticVar_1'
 
@@ -17,9 +17,9 @@ class Test_StaticVariableCreationAndAssignment(unittest.TestCase):
     def test_methodStaticVariables(self) -> None:
         class Bar:
             def foo(self):
-                initStatic = StaticInitor(Bar.foo)
-                initStatic.Var1 = lambda: var1Value
-                initStatic.Var2 = lambda: var2Value
+                static = StaticInitor(Bar.foo)
+                static.Var1 = lambda: var1Value
+                static.Var2 = lambda: var2Value
 
         var1Value = 'StaticVar_1'
         var2Value = 10
@@ -32,36 +32,16 @@ class Test_StaticVariableCreationAndAssignment(unittest.TestCase):
         self.assertEqual(Bar.foo.Var1, var1Value)
         self.assertEqual(Bar.foo.Var2, var2Value)
 
-class Test_StaticVariableReinitializationRaisesError(unittest.TestCase):
-    def test_functionStaticVariables(self) -> None:
-        def foo() -> None:
-            initStatic = StaticInitor(foo)
-            initStatic.Var1 = lambda: '1'
-            initStatic.Var1 = lambda: 1
-
-        with self.assertRaises(StaticInitor.ReinitializationError):
-            foo()
-
-    def test_methodStaticVariables(self) -> None:
-        class Bar:
-            def foo(self):
-                initStatic = StaticInitor(Bar.foo)
-                initStatic.Var1 = lambda: '1'
-                initStatic.Var1 = lambda: 1
-
-        with self.assertRaises(StaticInitor.ReinitializationError):
-            Bar().foo()
-
 class Test_GettingAttributesRaisesError(unittest.TestCase):
 
     __ErrMsgSubStr = 'Illegal operation.'
 
     def test_functionStaticVariables(self) -> None:
         def foo() -> None:
-            initStatic = StaticInitor(foo)
-            initStatic.Var1 = lambda: '1'
+            static = StaticInitor(foo)
+            static.Var1 = lambda: '1'
 
-            ref = initStatic.Var1
+            ref = static.Var1
 
         cls = self.__class__
         with self.assertRaisesRegex(TypeError, cls.__ErrMsgSubStr):
@@ -70,10 +50,10 @@ class Test_GettingAttributesRaisesError(unittest.TestCase):
     def test_methodStaticVariables(self) -> None:
         class Bar:
             def foo(self):
-                initStatic = StaticInitor(Bar.foo)
-                initStatic.Var1 = lambda: 1
+                static = StaticInitor(Bar.foo)
+                static.Var1 = lambda: 1
 
-                ref = initStatic.Var1
+                ref = static.Var1
 
         cls = self.__class__
         with self.assertRaisesRegex(TypeError, cls.__ErrMsgSubStr):
@@ -84,10 +64,10 @@ class Test_DeletingAttributesRaisesError(unittest.TestCase):
 
     def test_functionStaticVariables(self) -> None:
         def foo() -> None:
-            initStatic = StaticInitor(foo)
-            initStatic.Var1 = lambda: '1'
+            static = StaticInitor(foo)
+            static.Var1 = lambda: '1'
 
-            del initStatic.Var1
+            del static.Var1
 
         cls = self.__class__
         with self.assertRaisesRegex(TypeError, cls.__ErrMsgSubStr):
@@ -96,14 +76,41 @@ class Test_DeletingAttributesRaisesError(unittest.TestCase):
     def test_methodStaticVariables(self) -> None:
         class Bar:
             def foo(self):
-                initStatic = StaticInitor(Bar.foo)
-                initStatic.Var1 = lambda: 1
+                static = StaticInitor(Bar.foo)
+                static.Var1 = lambda: 1
 
-                del initStatic.Var1
+                del static.Var1
 
         cls = self.__class__
         with self.assertRaisesRegex(TypeError, cls.__ErrMsgSubStr):
             Bar().foo()
+
+class Test_StaticVariablesBehaveStatically(unittest.TestCase):
+    def test_functionStaticVariables(self) -> None:
+        def foo() -> int:
+            static = StaticInitor(foo)
+            static.Var1 = lambda: 0
+
+            foo.Var1 += 1
+            return foo.Var1
+
+        self.assertEqual(foo(), 1)
+        self.assertEqual(foo(), 2)
+
+    def test_methodStaticVariables(self) -> None:
+        class Bar:
+            def foo(self) -> int:
+                static = StaticInitor(Bar.foo)
+                static.Var1 = lambda: 0
+
+                Bar.foo.Var1 += 1
+                return Bar.foo.Var1
+
+        self.assertEqual(Bar().foo(), 1)
+        self.assertEqual(Bar().foo(), 2)
+
+class Test_StaticVariableReinitializationSilentlyFails(unittest.TestCase):
+    pass #TODO
 
 if __name__ == '__main__':
     unittest.main()
