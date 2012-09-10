@@ -15,19 +15,26 @@ Post-MetaClass Processing:
 
   R5)
   --
-  1.1) Enumeration constants shall have attribute Name which evaluates to the string representation of their lexical identifier prepended by the comboniation of their enclosing class name and ".".
+  1.1) Enumeration constants shall have attribute Name which evaluates to the
+    string representation of their lexical identifier prepended by the
+    comboniation of their enclosing class name and ".".
 
-  1.2) Enumeration constants shall implement the special method __str__. The returned string will have the same value as the instance attribute Name.
+  1.2) Enumeration constants shall implement the special method __str__. The
+    returned string will have the same value as the instance attribute Name.
 
   2.1) Enumeration constants will have attribute Value which evaluates to:
-    i) 0, if its instance was the first attribute declared in the enumeration class and is of type ellipsis, else
-    ii) j.Value + 1, if its instance is of type ellipsis, where j is the previously declared enumeration constant, else
+    i) 0, if its instance was the first attribute declared in the enumeration
+      class and is of type ellipsis, else
+    ii) j.Value + 1, if its instance is of type ellipsis, where j is the
+      previously declared enumeration constant, else
     iii) the integer value its instance was originally declared with.
 
-  2.2) Enumeration constants shall implement the special method __int__. The returned integer will have the same value as the attribute Value.
+  2.2) Enumeration constants shall implement the special method __int__. The
+    returned integer will have the same value as the attribute Value.
 
   R6) Enumeration constants shall be hashed on their ValueS attribute.
-  R7) Enumeration constants shall have a total order based on their ValueS attribute.
+  R7) Enumeration constants shall have a total order based on their ValueS
+    attribute.
 
   R8) Enumeration constants shall be attribute immutable.
 
@@ -37,14 +44,91 @@ Post-MetaClass Processing:
   -------------------
   R10) Enumeration classes shall not be instantiable by clients.
   R11) Enumeration classes shall be attribute immutable.
-  R12) Enumeration classes shall be iterable over their enumeration constants. The order of iteration will reflect the order of enumeration constant declarations of each class.
+  R12) Enumeration classes shall be iterable over their enumeration constants.
+    The order of iteration will reflect the order of enumeration constant
+    declarations of each class.
   R13) Enumeration classes shall have a str representation of the form:
-    <class 'module_name.enum_name': {'enum_const0_name': enum_const0_value, ...}>
+    <class 'module_name.enum_name': {'enum_const0_name': enum_const0_value,
+    ...}>
 
-    Where, for any given enumeration class E with enumeration constants of e0, e1, e2, ..., declared in lexicographical order,
+    Where, for any given enumeration class E with enumeration constants of e0,
+    e1, e2, ..., declared in lexicographical order,
       module_name = E.__module__
       enum_name = E.__name__
       enum_const0_name = E.e0.Name
       enum_const0_value = E.e0.Value
 
   R14) Enumeration classes shall be pickable.
+
+Rationale
+---------
+RN1)
+  1.1) It does not make sense for enums to inherit from each other. Inheritance
+    implies a subset behaviour for the inherited type, but in this case, the
+    inherited type would actually extend the behaviour of its super class.
+    Consider:
+
+    class Color(metaclass=Enum):
+        R = 0
+        G = 1
+        B = 3
+
+    class SoftColor(metaclass=Enum):
+        Cyan = 4
+        Magenta = 5
+
+    class EarthColor(metaclass=Enum):
+        Adobe = 4
+        Clay = 5
+
+    Neither SoftColor nor EarthColor is a subset of Color in terms of
+    behaviour.
+    As a result, the Liskov substitution principle is violated, and the
+    following connundrum created:
+
+      # What's the expected behaviour of foo()?
+      def foo() -> Color:
+          if(...):
+              return SoftColor.Cyan
+          else:
+              return EarthColor.Adobe
+
+RN2) Self-exlpanatory.
+
+RN3) This is to emulate C++ enums as close as possible. In C++, it is possible
+  for enumeration constants not to be explicitly initialized; however, in
+  Python this is disallowed, hence ellipses are used to emulate this.
+
+RN4) If Python ever allows the option of static type checking, this will allow
+  enumeration constants to work correctly with function annotations.
+  For example:
+
+    def foo(Color: c) -> None:
+        pass
+
+    foo(Color.R)
+RN5)
+  5.1) The integer value rules are lifted verbatim from C++.
+  5.2) The name value rules are self-evident.
+
+RN6) Since in C++ enumeration constants are primarily identified by their
+  integral values, it only makes since to have them default hashed based on
+  those same values.
+
+RN7) Same as RN6), just replace "hashed" with "ordered".
+
+RN8) Enumeration constants are by definition constant.
+
+RN9) Good trait to have.
+
+RN10) There is no real use case for enumeration classes to be instantiable by
+  clients.
+
+RN11) Again, there is no real use case for clients to change enumeration class
+  attributes.
+
+RN12) Can only help, and there appears to be no cost to it.
+
+RN13) Is helpful, and seems pretty self-evident.
+
+RN14) Good trait to have.
