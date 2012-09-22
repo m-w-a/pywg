@@ -280,7 +280,7 @@ class Test_EnumConstantsMustBeOfTypeIntOrEllipsis(unittest.TestCase):
 # R4
 class Test_EnumConstantsAreOfTypeEnum(unittest.TestCase):
 
-    def test_typeEnumConstTypes(self) -> None:
+    def test(self) -> None:
         class Color(metaclass=Enum):
             R = ...
             G = 1
@@ -485,7 +485,7 @@ class Test_EnumConstantsAttributesAreImmutable(unittest.TestCase):
 
     __ExpectedErrMsgSubStr = 'Illegal operation.'
 
-    def test_AttributesNotAssignable(self) -> None:
+    def test_attributesNotAssignable(self) -> None:
         cls = self.__class__
 
         with self.assertRaisesRegex(TypeError, cls.__ExpectedErrMsgSubStr):
@@ -500,7 +500,7 @@ class Test_EnumConstantsAttributesAreImmutable(unittest.TestCase):
         with self.assertRaisesRegex(TypeError, cls.__ExpectedErrMsgSubStr):
             cls.__Color.G.Value = 12
 
-    def test_AttributesNotCreatable(self) -> None:
+    def test_attributesNotCreatable(self) -> None:
         cls = self.__class__
 
         with self.assertRaisesRegex(TypeError, cls.__ExpectedErrMsgSubStr):
@@ -512,7 +512,7 @@ class Test_EnumConstantsAttributesAreImmutable(unittest.TestCase):
         with self.assertRaisesRegex(TypeError, cls.__ExpectedErrMsgSubStr):
             cls.__Color.G.Value2 = ...
 
-    def test_AttributesNotDeletable(self) -> None:
+    def test_attributesNotDeletable(self) -> None:
         cls = self.__class__
 
         with self.assertRaisesRegex(TypeError, cls.__ExpectedErrMsgSubStr):
@@ -577,7 +577,7 @@ class Test_EnumAttributesAreImmutable(unittest.TestCase):
 
     __ExpectedErrMsgSubStr = 'Illegal operation.'
 
-    def test_AttributesNotAssignable(self) -> None:
+    def test_attributesNotAssignable(self) -> None:
         cls = self.__class__
 
         with self.assertRaisesRegex(TypeError, cls.__ExpectedErrMsgSubStr):
@@ -586,7 +586,7 @@ class Test_EnumAttributesAreImmutable(unittest.TestCase):
         with self.assertRaisesRegex(TypeError, cls.__ExpectedErrMsgSubStr):
             cls.__Color.G = cls.__Color.R
 
-    def test_AttributesNotCreatable(self) -> None:
+    def test_attributesNotCreatable(self) -> None:
         cls = self.__class__
 
         with self.assertRaisesRegex(TypeError, cls.__ExpectedErrMsgSubStr):
@@ -595,7 +595,7 @@ class Test_EnumAttributesAreImmutable(unittest.TestCase):
         with self.assertRaisesRegex(TypeError, cls.__ExpectedErrMsgSubStr):
             cls.__Color.SomeOtherNewAttribute = 1
 
-    def test_AttributesNotDeletable(self) -> None:
+    def test_attributesNotDeletable(self) -> None:
         cls = self.__class__
 
         with self.assertRaisesRegex(TypeError, cls.__ExpectedErrMsgSubStr):
@@ -606,14 +606,14 @@ class Test_EnumAttributesAreImmutable(unittest.TestCase):
 
 # R12
 class Test_EnumIteration(unittest.TestCase):
-    def test_EmptyEnum(self) -> None:
+    def test_emptyEnum(self) -> None:
         class Color(metaclass=Enum):
             pass
 
         for enumConsts in Color:
             self.fail('Expected empty iteration.')
 
-    def test_NonEmptyEnum(self) -> None:
+    def test_nonEmptyEnum(self) -> None:
         class PlasmaTv(metaclass=Enum):
             R = ...
             G = 1
@@ -641,14 +641,14 @@ class Test_EnumIteration(unittest.TestCase):
 
 # R13
 class Test_EnumStrSpecialFunction(unittest.TestCase):
-    def test_EmptyEnum(self) -> None:
+    def test_emptyEnum(self) -> None:
         class Color(metaclass=Enum):
             pass
 
         expectedEnumStr = "<class '{0}.Color': {{}}>".format(Color.__module__)
         self.assertEqual(builtins.str(Color), expectedEnumStr)
 
-    def test_EnumWithOneConst(self) -> None:
+    def test_enumWithOneConst(self) -> None:
         class Color(metaclass=Enum):
             R = 1
 
@@ -656,7 +656,7 @@ class Test_EnumStrSpecialFunction(unittest.TestCase):
           "<class '{0}.Color': {{'Color.R': 1}}>".format(Color.__module__)
         self.assertEqual(builtins.str(Color), expectedEnumStr)
 
-    def test_EnumWithThreeConts(self) -> None:
+    def test_enumWithThreeConts(self) -> None:
         class Color(metaclass=Enum):
             R = 1
             G = ...
