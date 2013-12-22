@@ -154,20 +154,20 @@ class Enum(type):
         @classmethod
         def allowForInternalUse(cls, metacls) -> None:
 
-            def init() -> None:
+            def cacheMetaclsOriginalMethods() -> None:
                 nonlocal cls
                 if not cls.__DidInit:
                     cls.__DidInit = True
                     cls.__SetAttr = metacls.__setattr__
                     cls.__DelAttr = metacls.__delattr__
 
-            def reinstateOriginals() -> None:
+            def reinstateMetaclsOriginalMethods() -> None:
                 nonlocal metacls
                 metacls.__setattr__ = cls.__SetAttr
                 metacls.__delattr__ = cls.__DelAttr
 
-            init()
-            reinstateOriginals()
+            cacheMetaclsOriginalMethods()
+            reinstateMetaclsOriginalMethods()
 
         @classmethod
         def disallowForExternalUse(cls, metacls) -> None:
