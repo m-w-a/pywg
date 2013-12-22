@@ -6,8 +6,7 @@ import builtins
 import types
 import functools as ft
 
-class _ModuleInitMngr:
-    __DidInit = False
+class _OnImport:
     __Initors = []
 
     @classmethod
@@ -17,11 +16,8 @@ class _ModuleInitMngr:
 
     @classmethod
     def initAll(cls) -> None:
-        if not cls.__DidInit:
-            for initor in cls.__Initors:
-                initor()
-
-            cls.__DidInit = True
+        for initor in cls.__Initors:
+            initor()
 
         return None
 
@@ -96,18 +92,17 @@ class ExecutingScript:
 
     class __Impl:
 
-        __DidInit = False
         __ExecutingScriptModule = None
         __PossibleScriptDir = None
 
         @classmethod
         def init(cls) -> None:
-            if cls.__DidInit:
-                return None
-
+            """
+            Should only be called once, and only when this file is imported as a
+            module.
+            """
             cls.__ExecutingScriptModule = sys.modules['__main__']
             cls.__PossibleScriptDir = cls.__tryGettingDir()
-            cls.__DidInit = True
 
         @classmethod
         def getPossibleDir(cls) -> str or None:
@@ -241,7 +236,7 @@ class ExecutingScript:
             return toRet
 
     __InitRegistration = \
-      _ModuleInitMngr.addInitor(ft.partial(__Impl.init))
+      _OnImport.addInitor(ft.partial(__Impl.init))
 
 if __name__ != '__main__':
-    _ModuleInitMngr.initAll()
+    _OnImport.initAll()
