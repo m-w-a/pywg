@@ -1,8 +1,11 @@
 #!/bin/bash
 
 #------------------------------------------------------------------------------#
-# Bash shell script needed to verifiably pass in the executing python scripts
-# home directory as a command line argument to the python unit test.
+# The python unit test scripts in this directory and it subdirectories are 
+# intended to be run as stand alone executables, not imported and run via
+# the "python -m unittest" mechanism or programmatically via another python 
+# script. This is because they are intended to test features of the executing 
+# script itself.
 #------------------------------------------------------------------------------#
 
 usageMsg="\
@@ -46,6 +49,8 @@ do
     pyScript="${testfiles[${argIndx}]}"
     pyScriptAbsParentPath="$( cd "$( dirname "${pyScript}" )" && pwd )"
     pyScriptName="$(basename "${pyScript}")"
+    # The executing scripts path needs to be passed in because there is no 
+    # universally reliable way to access it in python.
     cmd=("${pythonExe}" "${pyScriptName}" "${pyScriptAbsParentPath}")
 
     echo "cd "${pyScriptAbsParentPath}"" 
