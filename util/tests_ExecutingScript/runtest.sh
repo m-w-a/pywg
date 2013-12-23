@@ -29,12 +29,14 @@ fi
 my_abs_filepath="${BASH_SOURCE[0]}"
 my_abs_parentpath="$( cd "$( dirname "$my_abs_filepath" )" && pwd )"
 
+unittestPattern="*_ExPyUnit.py"
+
 testfiles=
 if [ $# -eq 2 -a "$2" = '--all' ]
 then
     testfiles=(\
         $(find "${my_abs_parentpath}" \
-            -name "*_PyUnit.py" \
+            -name "${unittestPattern}" \
             -type f \
             -print0 \
           | \
