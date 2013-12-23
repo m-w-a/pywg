@@ -8,6 +8,8 @@ import argparse
 # import util.ExecutingScript
 # top_level_dir=util.ExecutingScript.ExecutingScript.getPossibleDir()
 
+_UnittestPattern="*_PyUnit.py"
+
 class _CommandLine:
     def __init__(self):
         self.__parsedCmdLine = None
@@ -74,7 +76,7 @@ def _runtestApp() -> None:
                 pattern = None
                 if os.path.isdir(path):
                     startDir = os.path.abspath(path)
-                    pattern="*PyUnit.py"
+                    pattern = _UnittestPattern
 
                 else:
                     filepath = os.path.abspath(path)
