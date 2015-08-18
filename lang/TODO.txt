@@ -1,0 +1,1 @@
+Add __index__ support.
