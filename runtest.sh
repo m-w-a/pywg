@@ -22,48 +22,52 @@ my_abs_parentpath="$( cd "$( dirname "${my_abs_filepath}" )" && pwd )"
 pythonExe="$1"
 packageDir="${my_abs_parentpath}"
 
-if [ $# -eq 3 -a "$2" = '--all' ]
-then
-    if [ ! -d "$3" ]
-    then
-        echo "Argument 3 must specify a directory."
-        exit 1
-    fi
+testEnumeratedFiles()
+{
+    local cmd=(
+        "${pythonExe}" -m unittest discover -t "${packageDir}" -p "${@:2}")
+    echo "${cmd[@]}"
+    eval "${cmd[@]}"
+}
 
-    dirToStartSearch="$3"
+testDiscoveredFiles()
+{
+    local dirToStartSearch="$3"
 
-    subRunnersList=( \
+    local subRunners=( \
         $(find "${dirToStartSearch}" \
+            -mindepth 2 \
             -name runtest.sh \
             -type f \
-            -mindepth 2 \
             -print0 \
           | \
             xargs -0 echo) )
 
-    subRunnersDirList=()
-    pruneSubStmt=''
-    for subRunner in "${subRunnersList[@]}"
+    local subRunnerDirs=()
+    local findCmdPruneSubStmt=''
+    # Compute subRunnerDirs and findCmdPruneSubStmt
+    for subRunner in "${subRunners[@]}"
     do
-        subDir="$(dirname "${subRunner}")"
-        subDirsToPrune="${subDir}/*"
+        local subDir="$(dirname "${subRunner}")"
+        local subDirsToPrune="${subDir}/*"
 
-        subRunnersDirList+=("${subDir}")
-        pruneSubStmt=""${pruneSubStmt}" -not -path \""${subDirsToPrune}"\""
+        subRunnerDirs+=("${subDir}")
+        findCmdPruneSubStmt=""${findCmdPruneSubStmt}" -not -path \""${subDirsToPrune}"\""
     done
 
     run()
     {
-        pythonExe="$1"
-        packageDir="$2"
-        test="$3"
+        local pythonExe="$1"
+        local packageDir="$2"
+        local test="$3"
 
-        cmd=("${pythonExe}"
-            -m unittest discover
-              -t "${packageDir}"
-              -p "${test}")
+        local cmd=(
+            "${pythonExe}"
+                -m unittest discover
+                -t "${packageDir}"
+                -p "\"*_PyUnit.py\"")
 
-        currentDir="$(cd "$(dirname "${test}")" && pwd)"
+        local currentDir="$(cd "$(dirname "${test}")" && pwd)"
         echo "cd ${currentDir}"
         echo "${cmd[@]}"
         eval "${cmd[@]}"
@@ -71,8 +75,8 @@ then
 
     export -f run
 
-    cmd=(find "${dirToStartSearch}" 
-        "${pruneSubStmt}" 
+    local cmd=(find "${dirToStartSearch}" 
+        "${findCmdPruneSubStmt}" 
         -name "\"*_PyUnit.py\""
         -type f 
         -execdir bash -c
@@ -82,14 +86,24 @@ then
     echo "${cmd[@]}"
     eval "${cmd[@]}"
 
-    for subRunnerDir in "${subRunnersDirList[@]}"
+    for subRunnerDir in "${subRunnerDirs[@]}"
     do
-        cmd=(cd "${subRunnerDir};" bash "./runtest.sh" "${pythonExe}" "--all")
+        local cmd=(
+          cd "${subRunnerDir};" bash "./runtest.sh" "${pythonExe}" "--all")
         echo "${cmd[@]}"
         eval "${cmd[@]}"
     done
+}
+
+if [ $# -eq 3 -a "$2" = '--all' ]
+then
+    if [ ! -d "$3" ]
+    then
+        echo "Argument 3 must specify a directory."
+        exit 1
+    fi
+    
+    testDiscoveredFiles "$@"
 else
-    cmd=("${pythonExe}" -m unittest discover -t "${packageDir}" -p "${@:2}")
-    echo "${cmd[@]}"
-    eval "${cmd[@]}"
+    testEnumeratedFiles "$@"
 fi
