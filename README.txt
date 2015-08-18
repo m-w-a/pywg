@@ -1,0 +1,3 @@
+This library has wg/lang/_Enum.py which was an attempt to create C++ like enums in Python3. Its requirements can be found here: wg/lang/EnumRequirements.txt. This was done some time before C++ like enums were officially added to Python3. It's uncanny how the official version matches my own version.
+
+All unit tests except for the one in wg/util/tests_ExecutingScript can be run via wg/runtest.py. For the former, one has to run wg/util/tests_ExecutingScript/runtest.sh.
