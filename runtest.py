@@ -23,7 +23,7 @@ class _CommandLine:
         
         The returned object will have the following attributes:
           verbosity <int>
-          paths <string(s) denoting unittest files or directories.>
+          paths <list of string(s) denoting unittest files or directories.>
         """
         return self.__parsedCmdLine
     
