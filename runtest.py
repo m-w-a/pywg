@@ -68,7 +68,7 @@ class _CommandLine:
 
 def _runtestApp() -> None:
     def foreachPathCombineAndRunAllUnittests(
-      verbosity : int, testpaths : str, topLevelPackageDir : str) -> None:
+      verbosity : int, testpaths, topLevelPackageDir : str) -> None:
         for path in testpaths:
             def getTestSuite(
               path : str, topLevelPackageDir : str) -> unittest.TestSuite:
