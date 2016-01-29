@@ -6,6 +6,10 @@ Unit Tests
 ----------
 All unit tests except for the one in pywg/util/tests_ExecutingScript can be run via pywg/runtest.py. For the former, one has to run pywg/util/tests_ExecutingScript/runtest.sh.
 
+Requirements and Rationale
+--------------------------
+Can be found here: pywg/lang/EnumRequirementsAndRationale.txt
+
 Sample Usage
 ------------
 from pywg.lang import *
