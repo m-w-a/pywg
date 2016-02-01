@@ -55,7 +55,7 @@ class Test_EnumCanOnlyInheritFromClassObject(unittest.TestCase):
                 R = 1
                 G = 2
 
-    def test_notOkIfMultiplyInherit(self) -> None:
+    def test_notOkIfMultipleInherit(self) -> None:
 
         expectedErrMsgSubStr = 'has base classes other than object'
 
