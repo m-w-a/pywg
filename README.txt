@@ -8,7 +8,8 @@ Can be found here: "./lang/EnumRequirementsAndRationale.txt".
 
 Unit Tests
 ----------
-All unit tests except for the ones in pywg/util/tests_ExecutingScript can be run via pywg/runtest.py. For the former, one has to run pywg/util/tests_ExecutingScript/runtest.sh.
+Can be found in "./lang" and "./util".
+All unit tests except for the ones in "./util/tests_ExecutingScript" can be run via "./runtest.py". For the former, one has to run "./util/tests_ExecutingScript/runtest.sh".
 
 Sample Usage
 ------------
